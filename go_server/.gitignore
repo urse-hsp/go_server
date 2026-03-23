@@ -1,0 +1,37 @@
+# config.yaml
+
+
+# --- 编译产物 ---
+tmp
+tmp/             # air 生成的临时目录，必须忽略
+bin/
+dist/
+build/
+*.exe
+*.out
+*.test
+
+# --- 依赖与工作区 ---
+vendor/
+go.work
+go.work.sum
+
+# --- IDE 配置 ---
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# --- 敏感信息与日志 ---
+config.yaml      # 建议忽略真实配置，防止密码泄露
+.env
+*.log
+logs/
+
+# --- 测试与临时文件 ---
+coverage.out
+profile.*
+testdata/
