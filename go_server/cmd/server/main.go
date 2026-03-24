@@ -15,13 +15,8 @@ func main() {
 	bootstrap.InitMysql()
 	bootstrap.InitRedis()
 
-	//  初始化定时任务
-	bootstrap.InitScheduler()
 	//  初始化日志
 	bootstrap.InitLogger()
-
-	// 初始化 http client
-	// task.InitTask()
 
 	// 启动服务
 	r := router.SetupRouter() // gin router 应用实例

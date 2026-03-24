@@ -1,4 +1,5 @@
 // lock.go（分布式锁，预留）
+// 既可以是单机锁，也可以是分布式锁
 
 package scheduler
 
