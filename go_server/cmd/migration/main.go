@@ -1,15 +1,17 @@
 // migration 执行器
 // 每次启动都会执行所有 SQL
-package bootstrap
+package migration
 
 import (
 	"fmt"
+	"go-demo-server/bootstrap"
 	"io/ioutil"
 	"path/filepath"
 )
 
+// 迁移数据库
 func RunMigrations() {
-	files, err := filepath.Glob("database/migrations/*.sql")
+	files, err := filepath.Glob("./*.sql")
 	if err != nil {
 		panic(err)
 	}
@@ -22,7 +24,7 @@ func RunMigrations() {
 			panic(err)
 		}
 
-		err = DB.Exec(string(sqlBytes)).Error
+		err = bootstrap.DB.Exec(string(sqlBytes)).Error
 		if err != nil {
 			panic("执行失败: " + file + " | " + err.Error())
 		}

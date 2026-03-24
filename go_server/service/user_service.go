@@ -12,6 +12,13 @@ import (
 	"time"
 )
 
+type userService interface {
+	Login(username string, password string) (dto.LoginResponse, error)
+	CreateUser(username string, password string) (dto.UserDTO, error)
+	GetUserDetail(id uint) (dto.UserDTO, error)
+	UpdateUser(info model.User, id uint) (dto.UserDTO, error)
+}
+
 func Login(username string, password string) (dto.LoginResponse, error) {
 	// fmt.Println(username, password)
 	// fmt.Printf("用户名=%s,密码=%s", username, password)

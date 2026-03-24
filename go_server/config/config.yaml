@@ -1,3 +1,4 @@
+env: local
 server:
   port: 8080
   mode: "debug"
@@ -9,14 +10,21 @@ database:
   password: "123456"
   dbname: "go_demo"
 
+redis:
+  addr: 127.0.0.1:6379
+  password: ""
+  db: 0
+  read_timeout: 0.2s
+  write_timeout: 0.2s
+  
 jwt:
-  secret: "your-secret-key"
+  secret: "QQYnRFerJTSEcrfB89fw8prOaObmrch8"
   expire_time: 24  # 过期时间
 
 log:
   log_level: info
   encoding: json           # json or console
-  log_file_name: "./storage/logs/server.log"
+  log_file_name: "./storage/logs/server.log" # 日志文件路径 (确保 logs 目录存在)
   max_backups: 30              # 日志文件最多保存多少个备份
   max_age: 7                   #  文件最多保存多少天
   max_size: 1024               #  每个日志文件保存的最大尺寸 单位：M

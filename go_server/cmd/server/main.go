@@ -4,7 +4,6 @@ import (
 	"go-demo-server/bootstrap"
 	"go-demo-server/config"
 	"go-demo-server/router"
-	"go-demo-server/utils"
 )
 
 func main() {
@@ -18,13 +17,13 @@ func main() {
 
 	//  初始化定时任务
 	bootstrap.InitScheduler()
+	//  初始化日志
+	bootstrap.InitLogger()
+
+	// 初始化 http client
+	// task.InitTask()
 
 	// 启动服务
 	r := router.SetupRouter() // gin router 应用实例
 	r.Run(":" + config.Conf.Server.Port)
-
-	//  初始化日志
-	utils.InitLogger()
-	defer utils.Sync() // 程序退出前确保日志写完
-	utils.Logger.Info("服务启动成功", "port", 8080)
 }

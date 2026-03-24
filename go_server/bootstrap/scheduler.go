@@ -1,7 +1,7 @@
 // bootstrap/scheduler.go
 package bootstrap
 
-import "go-demo-server/pkg/httpclient/scheduler"
+import "go-demo-server/pkg/scheduler"
 
 var Scheduler *scheduler.Scheduler
 

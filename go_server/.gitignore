@@ -1,9 +1,6 @@
-# config.yaml
-
-
 # --- 编译产物 ---
-tmp
-tmp/             # air 生成的临时目录，必须忽略
+# air 生成的临时目录，必须忽略
+tmp/ 
 bin/
 dist/
 build/
@@ -26,7 +23,8 @@ Thumbs.db
 *~
 
 # --- 敏感信息与日志 ---
-config.yaml      # 建议忽略真实配置，防止密码泄露
+# 建议忽略真实配置，防止密码泄露
+# config.yaml     
 .env
 *.log
 logs/

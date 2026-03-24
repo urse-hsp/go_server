@@ -39,25 +39,6 @@ func GenerateToken(userID uint, username string) string {
 	return tokenString
 }
 
-func GenerateToken2(userID uint, username string) string {
-	//  定义过期时间，比如 24 小时
-	duration := time.Duration(config.Conf.JWT.ExpireTime) * time.Hour
-	expirationTime := time.Now().Add(duration)
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id":   userID,
-		"user_name": username,
-		// 设置 "exp" (过期时间)
-		// 必须转换成 int64，格式是 Unix 时间戳
-		"exp": expirationTime.Unix(),
-		// 设置 "iat" (签发时间) - 可选，但推荐
-		"iat": time.Now().Unix(),
-	})
-	tokenString, _ := token.SignedString(GetJWTSecret())
-
-	return tokenString
-}
-
 // parseToken 解析和验证 Token 的辅助函数
 func ParseToken(tokenString string) (*jwt.Token, error) {
 	// 定义你的密钥（实际项目中最好放在环境变量里）

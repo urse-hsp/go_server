@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go-demo-server/config"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -12,10 +13,12 @@ import (
 var RDB *redis.Client
 
 func InitRedis() {
+	RDSConfig := config.Conf.Redis
+
 	RDB = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
+		Addr:     RDSConfig.Addr,
+		Password: RDSConfig.Password,
+		DB:       RDSConfig.DB,
 	})
 
 	// 🔥 检查连接是否成功

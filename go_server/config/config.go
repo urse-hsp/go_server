@@ -11,6 +11,8 @@ type AppConfig struct {
 	Server   ServerConfig   `mapstructure:"server"`
 	Database DatabaseConfig `mapstructure:"database"`
 	JWT      JWTConfig      `mapstructure:"jwt"`
+	Redis    RedisConfig    `mapstructure:"redis"`
+	Log      LogConfig      `mapstructure:"log"`
 }
 
 type ServerConfig struct {
@@ -26,9 +28,28 @@ type DatabaseConfig struct {
 	DBName   string `mapstructure:"dbname"`
 }
 
+type RedisConfig struct {
+	Addr         string `mapstructure:"addr"`
+	Password     string `mapstructure:"password"`
+	DB           int    `mapstructure:"db"`
+	ReadTimeout  string `mapstructure:"read_timeout"`
+	WriteTimeout string `mapstructure:"write_timeout"`
+}
+
 type JWTConfig struct {
 	Secret     string `mapstructure:"secret"`
 	ExpireTime int    `mapstructure:"expire_time"` // 单位：小时 (或者秒)
+}
+
+type LogConfig struct {
+	LogLevel     string `mapstructure:"log_level"`
+	Encoding     string `mapstructure:"encoding"`
+	LogFileName  string `mapstructure:"log_file_name"`
+	MaxBackups   int    `mapstructure:"max_backups"`
+	MaxAge       int    `mapstructure:"max_age"`
+	MaxSize      int    `mapstructure:"max_size"`
+	LogFileLevel string `mapstructure:"log_file_level"`
+	Compress     bool   `mapstructure:"compress"`
 }
 
 var Conf *AppConfig
