@@ -1,12 +1,18 @@
 package main
 
 import (
+	"go-demo-server/config"
 	"go-demo-server/pkg/scheduler"
 	"go-demo-server/task"
 	"log"
 )
 
 func main() {
+	// 初始化配置
+	if err := config.InitConfig(); err != nil {
+		panic(err)
+	}
+
 	log.Println("🚀 启动定时任务服务")
 
 	// 1. 初始化 scheduler

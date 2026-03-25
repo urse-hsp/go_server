@@ -12,7 +12,7 @@ import (
 
 var RDB *redis.Client
 
-func InitRedis() {
+func InitRedis() *redis.Client {
 	RDSConfig := config.Conf.Redis
 
 	RDB = redis.NewClient(&redis.Options{
@@ -32,6 +32,8 @@ func InitRedis() {
 	println("✅ Redis 连接成功")
 
 	// demo()
+	newRDB := RDB
+	return newRDB
 }
 
 func demo() {
