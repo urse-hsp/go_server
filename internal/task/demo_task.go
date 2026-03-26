@@ -3,7 +3,7 @@ package task
 import (
 	"context"
 	"fmt"
-	"go-demo-server/pkg/scheduler"
+	"go-demo-server/pkg/server/scheduler"
 	"time"
 )
 

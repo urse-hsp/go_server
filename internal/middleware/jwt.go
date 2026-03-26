@@ -2,7 +2,8 @@
 package middleware
 
 import (
-	"go-demo-server/utils"
+	v1 "go-demo-server/api/v1"
+	"go-demo-server/pkg/jwt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +29,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// 2. 简单的格式检查 (通常格式是 "Bearer <token>")
 		if tokenStr == "" {
-			utils.Unauthorized(c, "未登录，请携带 Token")
+			v1.Unauthorized(c, "未登录，请携带 Token")
 			c.Abort() // 终止后续流程
 			return
 		}
@@ -40,16 +41,16 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// 3. 核心拦截步骤：验证 Token 有效性
-		token, err := utils.ParseToken(tokenStr)
+		token, err := jwt.ParseToken(tokenStr)
 		if err != nil || !token.Valid {
-			utils.Unauthorized(c, "Token 无效或已过期")
+			v1.Unauthorized(c, "Token 无效或已过期")
 			c.Abort() // 验证失败，终止后续流程
 			return
 		}
 
 		// 4. 验证通过：将用户信息存入 Context
 		// 这样后续的 Handler 就可以通过 c.Get("user_id") 拿到当前登录用户
-		claims := token.Claims.(*utils.Claims)
+		claims := token.Claims.(*jwt.Claims)
 		c.Set("user_id", claims.UserID)
 		// c.Set("user_name", claims.UserName)
 

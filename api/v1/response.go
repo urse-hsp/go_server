@@ -1,6 +1,7 @@
-package utils
+package v1
 
 import (
+	"go-demo-server/internal/dto"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,39 +11,24 @@ import (
 // 成功（RESTful）
 // 失败（统一 response）
 
-type Response struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg,omitempty"`
-	// Data any    `json:"data,omitempty"`
-}
-
-type PageData struct {
-	List     any `json:"list"`
-	Total    int `json:"total"`
-	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
-}
-
-// ===== 核心出口（唯一 JSON 出口）=====
+// ===== 统一出口 =====
 func writeJSON(c *gin.Context, httpStatus int, res any) {
 	c.JSON(httpStatus, res)
 }
 
-// 核心方法
+// ===== 核心响应 =====
 func response(c *gin.Context, httpStatus int, code int, msg string, data any) {
-	// response(c, http.StatusOK, 0, "", PageData{
-	writeJSON(c, httpStatus, Response{
+	writeJSON(c, httpStatus, dto.Response{
 		Code: code,
 		Msg:  msg,
-		// Data: data,
+		Data: data,
 	})
 }
 
-// ===== 成功 =====
+// =================  成功 =================
 
 // 200
-func Success(c *gin.Context, data ...any) {
-	// response(c, http.StatusOK, 0, "", data)
+func Success(c *gin.Context, data any) {
 	writeJSON(c, http.StatusOK, data)
 }
 
@@ -53,7 +39,6 @@ func Success(c *gin.Context, data ...any) {
 
 // 201
 func Created(c *gin.Context, data any) {
-	// response(c, http.StatusCreated, 0, "created", data)
 	writeJSON(c, http.StatusCreated, data)
 }
 
@@ -62,7 +47,7 @@ func NoContent(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// ===== 错误 =====
+// =================  错误 =================
 
 func Fail(c *gin.Context, httpStatus int, code int, msg string) {
 	response(c, httpStatus, code, msg, nil)
@@ -81,8 +66,12 @@ func Unauthorized(c *gin.Context, msg ...string) {
 	Fail(c, http.StatusUnauthorized, 401, defaultMsg)
 }
 
-func Forbidden(c *gin.Context) {
-	Fail(c, http.StatusForbidden, 403, "禁止访问")
+func Forbidden(c *gin.Context, msg ...string) {
+	defaultMsg := "禁止访问"
+	if len(msg) > 0 {
+		defaultMsg = msg[0]
+	}
+	Fail(c, http.StatusForbidden, 403, defaultMsg)
 }
 
 func NotFound(c *gin.Context) {
@@ -97,9 +86,11 @@ func ServerError(c *gin.Context, msg ...string) {
 	Fail(c, http.StatusInternalServerError, 500, defaultMsg)
 }
 
+// =================  分页 =================
+
 // List 成功返回（分页）
 func List(c *gin.Context, list any, total int, page int, pageSize int) {
-	writeJSON(c, http.StatusOK, PageData{
+	writeJSON(c, http.StatusOK, dto.PageResponse{
 		List:     list,
 		Total:    total,
 		Page:     page,

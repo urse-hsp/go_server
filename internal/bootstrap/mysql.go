@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"fmt"
 	"go-demo-server/config"
-	"go-demo-server/model"
+	"go-demo-server/internal/model"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

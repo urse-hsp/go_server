@@ -1,11 +1,16 @@
 package main
 
 import (
-	"go-demo-server/bootstrap"
 	"go-demo-server/config"
-	"go-demo-server/router"
+	"go-demo-server/internal/bootstrap"
+	"go-demo-server/internal/router"
 )
 
+// @title go-demo-server API
+// @version 1.0
+// @description 接口文档
+// @host localhost:8080
+// @BasePath /
 func main() {
 	// 初始化配置
 	if err := config.InitConfig(); err != nil {
