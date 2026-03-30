@@ -1,4 +1,4 @@
-package dto
+package userdto
 
 // ================= 请求 DTO =================
 
@@ -11,7 +11,7 @@ type LoginRequest struct {
 // 更新用户
 type UserUpdateRequest struct {
 	Username string `json:"username"`
-	Avatar   string `json:"avatar"`
+	Avatar   string `json:"avatar" binding:"omitempty,url"`
 	// Email    string `json:"email"`
 	// Phone    string `json:"phone"`
 }

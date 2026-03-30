@@ -3,15 +3,31 @@ package dao
 import (
 	"errors"
 	"fmt"
-	"go-demo-server/internal/bootstrap"
-	"go-demo-server/internal/model"
+	"go-server/internal/bootstrap"
+	"go-server/internal/model"
 
 	"gorm.io/gorm"
 )
 
+type UserRepository interface {
+	GetUserByID(id uint) (*model.User, error)
+	GetUserByUsername(username string) (*model.User, error)
+	CreateUser(username string, password string) (*model.User, error)
+	UpdateUser(info model.User, id uint) (*model.User, error)
+	DeleteUser(id uint) error
+	GetUserList() ([]model.User, error)
+	GetUserLists(page, pageSize int) ([]model.User, int64, error)
+}
+
+type userRepository struct{}
+
+func NewUserRepository() UserRepository {
+	return &userRepository{}
+}
+
 // ================= 根据ID查询 =================
 
-func GetUserByID(id uint) (*model.User, error) {
+func (e *userRepository) GetUserByID(id uint) (*model.User, error) {
 	var user model.User
 
 	err := bootstrap.DB.First(&user, id).Error
@@ -24,7 +40,7 @@ func GetUserByID(id uint) (*model.User, error) {
 
 // ================= 根据用户名查询 =================
 
-func GetUserByUsername(username string) (*model.User, error) {
+func (e *userRepository) GetUserByUsername(username string) (*model.User, error) {
 	var user model.User
 
 	err := bootstrap.DB.Where("username = ?", username).First(&user).Error
@@ -37,9 +53,9 @@ func GetUserByUsername(username string) (*model.User, error) {
 
 // ================= 创建用户 =================
 
-func CreateUser(username string, password string) (*model.User, error) {
+func (e *userRepository) CreateUser(username string, password string) (*model.User, error) {
 	// 判断是否已存在
-	_, err := GetUserByUsername(username)
+	_, err := e.GetUserByUsername(username)
 
 	if err == nil {
 		return nil, fmt.Errorf("用户名已存在")
@@ -65,7 +81,7 @@ func CreateUser(username string, password string) (*model.User, error) {
 
 // ================= 更新用户 =================
 
-func UpdateUser(user model.User, id uint) (*model.User, error) {
+func (e *userRepository) UpdateUser(user model.User, id uint) (*model.User, error) {
 	result := bootstrap.DB.Model(&model.User{}).
 		Where("id = ?", id).
 		Updates(&user)
@@ -89,7 +105,7 @@ func UpdateUser(user model.User, id uint) (*model.User, error) {
 
 // ================= 删除用户 =================
 
-func DeleteUser(id uint) error {
+func (e *userRepository) DeleteUser(id uint) error {
 	result := bootstrap.DB.Where("id = ?", id).Delete(&model.User{})
 
 	if result.Error != nil {
@@ -105,7 +121,7 @@ func DeleteUser(id uint) error {
 
 // ================= 用户列表 =================
 
-func GetUserList() ([]model.User, error) {
+func (e *userRepository) GetUserList() ([]model.User, error) {
 	var users []model.User
 
 	if err := bootstrap.DB.Find(&users).Error; err != nil {
@@ -117,7 +133,7 @@ func GetUserList() ([]model.User, error) {
 
 // ================= 用户列表 分页 =================
 
-func GetUserLists(page, pageSize int) ([]model.User, int64, error) {
+func (e *userRepository) GetUserLists(page, pageSize int) ([]model.User, int64, error) {
 	var users []model.User
 
 	db := bootstrap.DB.Model(&model.User{})

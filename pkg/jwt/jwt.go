@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"go-demo-server/config"
+	"go-server/config"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -19,7 +19,7 @@ func GetJWTSecret() []byte {
 	return []byte(config.Conf.JWT.Secret)
 }
 
-func GenerateToken(userID uint, username string) string {
+func GenerateToken(userID uint, username string) (string, error) {
 	duration := time.Duration(config.Conf.JWT.ExpireTime) * time.Hour
 
 	claims := Claims{
@@ -32,11 +32,7 @@ func GenerateToken(userID uint, username string) string {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(GetJWTSecret())
-	if err != nil {
-		return ""
-	}
-	return tokenString
+	return token.SignedString(GetJWTSecret())
 }
 
 // parseToken 解析和验证 Token 的辅助函数

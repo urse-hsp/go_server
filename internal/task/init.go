@@ -1,8 +1,8 @@
 package task
 
 import (
-	"go-demo-server/internal/bootstrap"
-	"go-demo-server/pkg/server/scheduler"
+	"go-server/internal/bootstrap"
+	"go-server/pkg/server/scheduler"
 )
 
 // 注册任务

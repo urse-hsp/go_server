@@ -1,9 +1,9 @@
 package main
 
 import (
-	"go-demo-server/config"
-	"go-demo-server/internal/task"
-	"go-demo-server/pkg/server/scheduler"
+	"go-server/config"
+	"go-server/internal/task"
+	"go-server/pkg/server/scheduler"
 	"log"
 )
 

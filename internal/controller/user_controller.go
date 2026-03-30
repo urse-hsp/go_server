@@ -2,15 +2,39 @@ package controller
 
 import (
 	"fmt"
-	v1 "go-demo-server/api/v1"
-	"go-demo-server/internal/dto"
-	"go-demo-server/internal/model"
-	"go-demo-server/internal/service"
+	v1 "go-server/api/v1"
+	userdto "go-server/internal/dto/user"
+	"go-server/internal/model"
+	"go-server/internal/service"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 )
+
+type UserController interface {
+	Login(c *gin.Context)
+	Create(c *gin.Context)
+	DeleteUser(c *gin.Context)
+	GetUserInfo(c *gin.Context)
+	UpdateUser(c *gin.Context)
+	GetUserList(c *gin.Context)
+	GetUserDetail(c *gin.Context)
+	GetUserLists(c *gin.Context)
+}
+
+type userController struct {
+	userService service.UserService // 依赖注入
+}
+
+func NewUserController(s service.UserService) UserController {
+	return &userController{
+		userService: s,
+	}
+}
+
+//
+// var userService = service.NewUserService() // 能用但不推荐，代码写死了，
 
 // ================= 登录 =================
 
@@ -19,26 +43,26 @@ import (
 // @Tags 用户
 // @Accept json
 // @Produce json
-// @Param data body dto.LoginRequest true "登录参数"
-// @Success 200 {object} dto.LoginResponse
-// @Router /api/user/login [post]
-func Login(c *gin.Context) {
-	var req dto.LoginRequest
+// @Param data body userdto.LoginRequest true "登录参数"
+// @Success 200 {object} userdto.LoginResponse
+// @Router /user/login [post]
+func (u *userController) Login(c *gin.Context) {
+	var req userdto.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		v1.BadRequest(c, "请求参数错误") // // 如果 JSON 里没传 username 或 password，就报错
 		return
 	}
 
-	user, token, err := service.Login(req.Username, req.Password)
+	user, token, err := u.userService.Login(req.Username, req.Password)
 	if err != nil {
-		v1.Unauthorized(c) // 401 用户名或密码不对
+		v1.Unauthorized(c, "用户名或密码不对") // 401 用户名或密码不对
 		return
 	}
 
-	v1.Success(c, dto.LoginResponse{
+	v1.Success(c, userdto.LoginResponse{
 		Token: token,
-		User:  toPrivateDTO(user),
+		User:  userdto.ToUserPrivateDTO(user),
 	})
 }
 
@@ -48,24 +72,24 @@ func Login(c *gin.Context) {
 // @Tags 用户
 // @Accept json
 // @Produce json
-// @Param data body dto.LoginRequest true "注册参数"
-// @Success 200 {object} dto.UserPrivateDTO
-// @Router /api/user/register [post]
-func Create(c *gin.Context) {
-	var req dto.LoginRequest
+// @Param data body userdto.LoginRequest true "注册参数"
+// @Success 200 {object} userdto.UserPrivateDTO
+// @Router /user/register [post]
+func (u *userController) Create(c *gin.Context) {
+	var req userdto.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		v1.BadRequest(c, "请求参数错误")
 		return
 	}
 
-	user, err := service.Create(req.Username, req.Password)
+	user, err := u.userService.Create(req.Username, req.Password)
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
 	}
 
-	v1.Created(c, toPrivateDTO(user))
+	v1.Created(c, userdto.ToUserPrivateDTO(user))
 }
 
 // ================= 获取当前用户 =================
@@ -73,18 +97,18 @@ func Create(c *gin.Context) {
 // @Summary 获取当前用户信息
 // @Tags 用户
 // @Produce json
-// @Success 200 {object} dto.UserPrivateDTO
-// @Router /api/user/info [get]
-func GetUserInfo(c *gin.Context) {
+// @Success 200 {object} userdto.UserPrivateDTO
+// @Router /user/info [get]
+func (u *userController) GetUserInfo(c *gin.Context) {
 	userID := v1.GetUserID(c)
 
-	user, err := service.GetUserDetail(userID)
+	user, err := u.userService.GetUserDetail(userID)
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
 	}
 
-	v1.Success(c, toPrivateDTO(user))
+	v1.Success(c, userdto.ToUserPrivateDTO(user))
 }
 
 // ================= 更新当前用户 =================
@@ -93,14 +117,14 @@ func GetUserInfo(c *gin.Context) {
 // @Tags 用户
 // @Accept json
 // @Produce json
-// @Param data body dto.UserUpdateRequest true "更新参数"
-// @Success 200 {object} dto.UserPrivateDTO
-// @Router /api/user/info [put]
-func UpdateUser(c *gin.Context) {
-	var req dto.UserUpdateRequest
+// @Param data body userdto.UserUpdateRequest true "更新参数"
+// @Success 200 {object} userdto.UserPrivateDTO
+// @Router /user/info [put]
+func (u *userController) UpdateUser(c *gin.Context) {
+	var req userdto.UserUpdateRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		v1.BadRequest(c, "请求参数错误")
+		v1.BadRequest(c, "请求参数错误"+err.Error())
 		return
 	}
 
@@ -113,13 +137,13 @@ func UpdateUser(c *gin.Context) {
 
 	userID := v1.GetUserID(c)
 
-	user, err := service.UpdateUser(userModel, userID)
+	user, err := u.userService.UpdateUser(userModel, userID)
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
 	}
 
-	v1.Success(c, toPrivateDTO(user))
+	v1.Success(c, userdto.ToUserPrivateDTO(user))
 }
 
 // ================= 获取他人用户 =================
@@ -128,9 +152,9 @@ func UpdateUser(c *gin.Context) {
 // @Tags 用户
 // @Produce json
 // @Param id path int true "用户ID"
-// @Success 200 {object} dto.UserPublicDTO
-// @Router /api/users/{id} [get]
-func GetUserDetail(c *gin.Context) {
+// @Success 200 {object} userdto.UserPublicDTO
+// @Router /users/{id} [get]
+func (u *userController) GetUserDetail(c *gin.Context) {
 	idStr := c.Param("id")
 
 	// ID 通常是正整数 → 建议用 ParseUint 并转 uint
@@ -141,7 +165,7 @@ func GetUserDetail(c *gin.Context) {
 		return
 	}
 
-	user, err := service.GetUserDetail(uint(id))
+	user, err := u.userService.GetUserDetail(uint(id))
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
@@ -151,9 +175,9 @@ func GetUserDetail(c *gin.Context) {
 
 	// 权限控制：自己 vs 他人
 	if currentUserID == uint(id) {
-		v1.Success(c, toPrivateDTO(user))
+		v1.Success(c, userdto.ToUserPrivateDTO(user))
 	} else {
-		v1.Success(c, toPublicDTO(user))
+		v1.Success(c, userdto.ToUserPublicDTO(user))
 	}
 }
 
@@ -164,8 +188,8 @@ func GetUserDetail(c *gin.Context) {
 // @Produce json
 // @Param id path int true "用户ID"
 // @Success 204 {string} string "No Content"
-// @Router /api/user/{id} [delete]
-func DeleteUser(c *gin.Context) {
+// @Router /user/{id} [delete]
+func (u *userController) DeleteUser(c *gin.Context) {
 	fmt.Print("删除用户\n")
 
 	idStr := c.Param("id")
@@ -184,7 +208,7 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 	fmt.Print(idStr, "9999\n")
-	if err := service.DeleteUser(uint(id)); err != nil {
+	if err := u.userService.DeleteUser(uint(id)); err != nil {
 		v1.BadRequest(c, err.Error())
 		return
 	}
@@ -196,20 +220,16 @@ func DeleteUser(c *gin.Context) {
 // @Summary 用户列表
 // @Tags 用户
 // @Produce json
-// @Success 200 {object} []dto.UserPublicDTO
-// @Router /api/users [get]
-func GetUserList(c *gin.Context) {
-	users, err := service.GetUserList()
+// @Success 200 {object} []userdto.UserPublicDTO
+// @Router /users [get]
+func (u *userController) GetUserList(c *gin.Context) {
+	users, err := u.userService.GetUserList()
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
 	}
 
-	list := make([]dto.UserPublicDTO, 0)
-
-	for _, u := range users {
-		list = append(list, toPublicDTO(&u))
-	}
+	list := userdto.UserListToPublic(users)
 
 	v1.Success(c, list)
 }
@@ -219,38 +239,18 @@ func GetUserList(c *gin.Context) {
 // @Summary 用户列表 分页
 // @Tags 用户
 // @Produce json
-// @Success 200 {object} dto.PageResponse
-// @Router /api/users/list [get]
-func GetUserLists(c *gin.Context) {
+// @Success 200 {object} v1.PageResponse
+// @Router /users/list [get]
+func (u *userController) GetUserLists(c *gin.Context) {
 	page, pageSize := v1.GetPage(c)
 
-	users, total, err := service.GetUserLists(page, pageSize)
+	users, total, err := u.userService.GetUserLists(page, pageSize)
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
 	}
 
-	v1.List(c, users, int(total), page, pageSize)
-}
+	list := userdto.UserListToPublic(users)
 
-// ================= DTO 转换 =================
-
-// 👉 他人可见
-func toPublicDTO(u *model.User) dto.UserPublicDTO {
-	return dto.UserPublicDTO{
-		ID:       u.ID,
-		Username: u.Username,
-		Avatar:   u.Avatar,
-	}
-}
-
-// 👉 自己可见
-func toPrivateDTO(u *model.User) dto.UserPrivateDTO {
-	return dto.UserPrivateDTO{
-		ID:       u.ID,
-		Username: u.Username,
-		Avatar:   u.Avatar,
-		// Email:    u.Email,
-		// Phone:    u.Phone,
-	}
+	v1.List(c, list, int(total), page, pageSize)
 }

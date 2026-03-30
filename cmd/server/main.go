@@ -1,12 +1,12 @@
 package main
 
 import (
-	"go-demo-server/config"
-	"go-demo-server/internal/bootstrap"
-	"go-demo-server/internal/router"
+	"go-server/config"
+	"go-server/internal/bootstrap"
+	"go-server/internal/router"
 )
 
-// @title go-demo-server API
+// @title go-server API
 // @version 1.0
 // @description 接口文档
 // @host localhost:8080
@@ -21,7 +21,7 @@ func main() {
 	bootstrap.InitRedis()
 
 	//  初始化日志
-	bootstrap.InitLogger()
+	bootstrap.InitLogger(config.Conf.Log)
 
 	// 启动服务
 	r := router.SetupRouter() // gin router 应用实例

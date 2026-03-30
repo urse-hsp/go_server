@@ -2,8 +2,8 @@ package bootstrap
 
 import (
 	"fmt"
-	"go-demo-server/config"
-	"go-demo-server/internal/model"
+	"go-server/config"
+	"go-server/internal/model"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

@@ -1,4 +1,10 @@
 # scripts
+	go mod tidy 
+	更新依赖
+	自动补全缺失依赖
+	自动写入 go.sum
+	清理没用的依赖
+
  swag init -g cmd/server/main.go // 更新文文档
  go run cmd/server/main.go // 启动服务
 

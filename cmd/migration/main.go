@@ -4,7 +4,7 @@ package migration
 
 import (
 	"fmt"
-	"go-demo-server/internal/bootstrap"
+	"go-server/internal/bootstrap"
 	"io/ioutil"
 	"path/filepath"
 )

@@ -2,14 +2,14 @@
     "swagger": "2.0",
     "info": {
         "description": "接口文档",
-        "title": "go-demo-server API",
+        "title": "go-server API",
         "contact": {},
         "version": "1.0"
     },
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
-        "/api/user/info": {
+        "/user/info": {
             "get": {
                 "produces": [
                     "application/json"
@@ -22,7 +22,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserPrivateDTO"
+                            "$ref": "#/definitions/userdto.UserPrivateDTO"
                         }
                     }
                 }
@@ -45,7 +45,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserUpdateRequest"
+                            "$ref": "#/definitions/userdto.UserUpdateRequest"
                         }
                     }
                 ],
@@ -53,13 +53,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserPrivateDTO"
+                            "$ref": "#/definitions/userdto.UserPrivateDTO"
                         }
                     }
                 }
             }
         },
-        "/api/user/login": {
+        "/user/login": {
             "post": {
                 "description": "输入账号密码获取 token",
                 "consumes": [
@@ -79,7 +79,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginRequest"
+                            "$ref": "#/definitions/userdto.LoginRequest"
                         }
                     }
                 ],
@@ -87,13 +87,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginResponse"
+                            "$ref": "#/definitions/userdto.LoginResponse"
                         }
                     }
                 }
             }
         },
-        "/api/user/register": {
+        "/user/register": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -112,7 +112,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginRequest"
+                            "$ref": "#/definitions/userdto.LoginRequest"
                         }
                     }
                 ],
@@ -120,80 +120,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserPrivateDTO"
+                            "$ref": "#/definitions/userdto.UserPrivateDTO"
                         }
                     }
                 }
             }
         },
-        "/api/users": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户"
-                ],
-                "summary": "用户列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.UserPublicDTO"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/users/list": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户"
-                ],
-                "summary": "用户列表 分页",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.PageResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/users/{id}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户"
-                ],
-                "summary": "获取用户详情",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "用户ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.UserPublicDTO"
-                        }
-                    }
-                }
-            },
+        "/user/{id}": {
             "delete": {
                 "produces": [
                     "application/json"
@@ -220,10 +153,79 @@
                     }
                 }
             }
+        },
+        "/users": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "用户列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/userdto.UserPublicDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/list": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "用户列表 分页",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.PageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "获取用户详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/userdto.UserPublicDTO"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "dto.LoginRequest": {
+        "userdto.LoginRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -238,21 +240,66 @@
                 }
             }
         },
-        "dto.LoginResponse": {
+        "userdto.LoginResponse": {
             "type": "object",
             "properties": {
                 "token": {
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/dto.UserPrivateDTO"
+                    "$ref": "#/definitions/userdto.UserPrivateDTO"
                 }
             }
         },
-        "dto.PageResponse": {
+        "userdto.UserPrivateDTO": {
             "type": "object",
             "properties": {
-                "list": {},
+                "avatar": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "userdto.UserPublicDTO": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "userdto.UserUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.PageResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
                 "page": {
                     "type": "integer"
                 },
@@ -261,57 +308,6 @@
                 },
                 "total": {
                     "type": "integer"
-                }
-            }
-        },
-        "dto.UserPrivateDTO": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.UserPublicDTO": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.UserUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
                 }
             }
         }

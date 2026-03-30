@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  dto.LoginRequest:
+  userdto.LoginRequest:
     properties:
       password:
         type: string
@@ -10,16 +10,45 @@ definitions:
     - password
     - username
     type: object
-  dto.LoginResponse:
+  userdto.LoginResponse:
     properties:
       token:
         type: string
       user:
-        $ref: '#/definitions/dto.UserPrivateDTO'
+        $ref: '#/definitions/userdto.UserPrivateDTO'
     type: object
-  dto.PageResponse:
+  userdto.UserPrivateDTO:
     properties:
-      list: {}
+      avatar:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+      username:
+        type: string
+    type: object
+  userdto.UserPublicDTO:
+    properties:
+      avatar:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+  userdto.UserUpdateRequest:
+    properties:
+      avatar:
+        type: string
+      username:
+        type: string
+    type: object
+  v1.PageResponse:
+    properties:
+      data: {}
       page:
         type: integer
       pageSize:
@@ -27,136 +56,14 @@ definitions:
       total:
         type: integer
     type: object
-  dto.UserPrivateDTO:
-    properties:
-      avatar:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      phone:
-        type: string
-      username:
-        type: string
-    type: object
-  dto.UserPublicDTO:
-    properties:
-      avatar:
-        type: string
-      id:
-        type: integer
-      username:
-        type: string
-    type: object
-  dto.UserUpdateRequest:
-    properties:
-      avatar:
-        type: string
-      email:
-        type: string
-      phone:
-        type: string
-      username:
-        type: string
-    type: object
 host: localhost:8080
 info:
   contact: {}
   description: 接口文档
-  title: go-demo-server API
+  title: go-server API
   version: "1.0"
 paths:
-  /api/user/info:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.UserPrivateDTO'
-      summary: 获取当前用户信息
-      tags:
-      - 用户
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: 更新参数
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UserUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.UserPrivateDTO'
-      summary: 更新当前用户
-      tags:
-      - 用户
-  /api/user/login:
-    post:
-      consumes:
-      - application/json
-      description: 输入账号密码获取 token
-      parameters:
-      - description: 登录参数
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.LoginResponse'
-      summary: 用户登录
-      tags:
-      - 用户
-  /api/user/register:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: 注册参数
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.UserPrivateDTO'
-      summary: 用户注册
-      tags:
-      - 用户
-  /api/users:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/dto.UserPublicDTO'
-            type: array
-      summary: 用户列表
-      tags:
-      - 用户
-  /api/users/{id}:
+  /user/{id}:
     delete:
       parameters:
       - description: 用户ID
@@ -174,6 +81,96 @@ paths:
       summary: 删除用户
       tags:
       - 用户
+  /user/info:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userdto.UserPrivateDTO'
+      summary: 获取当前用户信息
+      tags:
+      - 用户
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/userdto.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userdto.UserPrivateDTO'
+      summary: 更新当前用户
+      tags:
+      - 用户
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: 输入账号密码获取 token
+      parameters:
+      - description: 登录参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/userdto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userdto.LoginResponse'
+      summary: 用户登录
+      tags:
+      - 用户
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 注册参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/userdto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userdto.UserPrivateDTO'
+      summary: 用户注册
+      tags:
+      - 用户
+  /users:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/userdto.UserPublicDTO'
+            type: array
+      summary: 用户列表
+      tags:
+      - 用户
+  /users/{id}:
     get:
       parameters:
       - description: 用户ID
@@ -187,11 +184,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.UserPublicDTO'
+            $ref: '#/definitions/userdto.UserPublicDTO'
       summary: 获取用户详情
       tags:
       - 用户
-  /api/users/list:
+  /users/list:
     get:
       produces:
       - application/json
@@ -199,7 +196,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.PageResponse'
+            $ref: '#/definitions/v1.PageResponse'
       summary: 用户列表 分页
       tags:
       - 用户

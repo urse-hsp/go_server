@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"go-demo-server/config"
+	"go-server/config"
 	"time"
 
 	"github.com/redis/go-redis/v9"

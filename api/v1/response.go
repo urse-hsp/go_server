@@ -1,11 +1,28 @@
 package v1
 
 import (
-	"go-demo-server/internal/dto"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+type Response struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg,omitempty"`
+	Data any    `json:"data,omitempty"`
+}
+
+type PageRequest struct {
+	Page     int `form:"page"`
+	PageSize int `form:"pageSize"`
+}
+
+type PageResponse struct {
+	Data     any `json:"data"`
+	Total    int `json:"total"`
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
+}
 
 // RESTful + 统一错误结构（混合模式）
 // 成功（RESTful）
@@ -18,7 +35,7 @@ func writeJSON(c *gin.Context, httpStatus int, res any) {
 
 // ===== 核心响应 =====
 func response(c *gin.Context, httpStatus int, code int, msg string, data any) {
-	writeJSON(c, httpStatus, dto.Response{
+	writeJSON(c, httpStatus, Response{
 		Code: code,
 		Msg:  msg,
 		Data: data,
@@ -89,9 +106,9 @@ func ServerError(c *gin.Context, msg ...string) {
 // =================  分页 =================
 
 // List 成功返回（分页）
-func List(c *gin.Context, list any, total int, page int, pageSize int) {
-	writeJSON(c, http.StatusOK, dto.PageResponse{
-		List:     list,
+func List(c *gin.Context, data any, total int, page int, pageSize int) {
+	writeJSON(c, http.StatusOK, PageResponse{
+		Data:     data,
 		Total:    total,
 		Page:     page,
 		PageSize: pageSize,

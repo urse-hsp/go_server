@@ -1,7 +1,7 @@
 package bootstrap
 
 import (
-	"go-demo-server/config"
+	"go-server/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -10,9 +10,8 @@ import (
 
 var Logger *zap.SugaredLogger
 
-func InitLogger() {
-	LOGConfig := config.Conf.Log
-
+// 简单全局日志
+func InitLogger(LOGConfig config.LogConfig) {
 	// 1. 配置日志写入位置 (使用 lumberjack 实现自动切割)
 	writeSyncer := zapcore.AddSync(&lumberjack.Logger{
 		Filename:   LOGConfig.LogFileName, // 日志文件路径 (确保 logs 目录存在)
