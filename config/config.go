@@ -59,7 +59,7 @@ func InitConfig() error {
 	v := viper.New()
 
 	// 1. 设置配置文件名（不含扩展名）
-	v.SetConfigName("config")
+	v.SetConfigName("local")
 	// 2. 设置配置文件类型
 	v.SetConfigType("yaml")
 	// 3. 设置查找路径

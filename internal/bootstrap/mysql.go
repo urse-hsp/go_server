@@ -1,50 +1,110 @@
 package bootstrap
 
 import (
-	"fmt"
-	"go-server/config"
-	"go-server/internal/model"
+	"context"
+	"go-server/pkg/log"
+	"go-server/pkg/zapgorm2"
+	"time"
 
+	"github.com/redis/go-redis/v9"
+	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-// 声明全局变量
-var DB *gorm.DB
+type Repository struct {
+	db  *gorm.DB
+	rdb *redis.Client
+	//mongo  *mongo.Client
+	logger *log.Logger
+}
 
-// 初始化函数
-func InitMysql() {
-	dbConfig := config.Conf.Database
+// Repository 负责数据库连接和事务管理
+func NewRepository(
+	logger *log.Logger,
+	db *gorm.DB,
+	rdb *redis.Client,
+	// mongo *mongo.Client,
+) *Repository {
+	return &Repository{
+		db:  db,
+		rdb: rdb,
+		//mongo:  mongo,
+		logger: logger,
+	}
+}
 
-	// dsn := "root:123456@tcp(127.0.0.1:3306)/go_demo"
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		dbConfig.User,
-		dbConfig.Password,
-		dbConfig.Host,
-		dbConfig.Port,
-		dbConfig.DBName,
+// 事物接口
+// 将数据库事务的执行逻辑抽象化
+type Transaction interface {
+	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
+}
+
+func NewTransaction(r *Repository) Transaction {
+	return r
+}
+
+const ctxTxKey = "TxKey"
+
+// DB return tx
+// If you need to create a Transaction, you must call DB(ctx) and Transaction(ctx,fn)
+func (r *Repository) DB(ctx context.Context) *gorm.DB {
+	v := ctx.Value(ctxTxKey)
+	if v != nil {
+		if tx, ok := v.(*gorm.DB); ok {
+			return tx
+		}
+	}
+	return r.db.WithContext(ctx)
+}
+
+func (r *Repository) Transaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	return r.DB(ctx).Transaction(func(tx *gorm.DB) error {
+		ctx = context.WithValue(ctx, ctxTxKey, tx)
+		return fn(ctx)
+	})
+}
+
+func NewDB(conf *viper.Viper, l *log.Logger) *gorm.DB {
+	var (
+		db  *gorm.DB
+		err error
 	)
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("❌ 数据库连接失败: " + dsn)
-	}
+	logger := zapgorm2.New(l.Logger)
+	driver := conf.GetString("data.db.user.driver")
+	dsn := conf.GetString("data.db.user.dsn")
 
+	// GORM doc: https://gorm.io/docs/connecting_to_the_database.html
+	switch driver {
+	case "mysql":
+		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+			Logger: logger,
+		})
+	// case "postgres":
+	// 	db, err = gorm.Open(postgres.New(postgres.Config{
+	// 		DSN:                  dsn,
+	// 		PreferSimpleProtocol: true, // disables implicit prepared statement usage
+	// 	}), &gorm.Config{})
+	// case "sqlite":
+	// 	db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{})
+	default:
+		panic("unknown db driver")
+	}
+	if err != nil {
+		panic(err)
+	}
+	db = db.Debug()
+
+	// Connection Pool config
 	sqlDB, err := db.DB()
 	if err != nil {
-		panic("❌ 获取 DB 实例失败: " + err.Error())
+		panic(err)
 	}
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	if err := sqlDB.Ping(); err != nil {
-		panic("❌ 数据库连接失败（Ping）: " + err.Error())
-	}
-
-	fmt.Println("✅ MySQL 连接成功")
-
-	DB = db
-
-	autoMigrateErr := DB.AutoMigrate(model.GetModels()...)
-	if autoMigrateErr != nil {
-		panic("❌ 数据库迁移失败: " + autoMigrateErr.Error())
-	}
+	println("✅ MySQL 连接成功")
+	return db
 }

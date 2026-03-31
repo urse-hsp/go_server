@@ -5,6 +5,8 @@ package migration
 import (
 	"fmt"
 	"go-server/internal/bootstrap"
+	"go-server/pkg/config"
+	"go-server/pkg/log"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -16,6 +18,11 @@ func RunMigrations() {
 		panic(err)
 	}
 
+	envConf := "config/local.yaml"
+	conf := config.NewConfig(envConf)
+	logger := log.NewLog(conf)          // 初始化日志
+	DB := bootstrap.NewDB(conf, logger) // 初始化 MySQL
+
 	for _, file := range files {
 		fmt.Println("执行 migration:", file)
 
@@ -24,7 +31,7 @@ func RunMigrations() {
 			panic(err)
 		}
 
-		err = bootstrap.DB.Exec(string(sqlBytes)).Error
+		err = DB.Exec(string(sqlBytes)).Error
 		if err != nil {
 			panic("执行失败: " + file + " | " + err.Error())
 		}

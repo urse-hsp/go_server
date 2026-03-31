@@ -33,9 +33,6 @@ func NewUserController(s service.UserService) UserController {
 	}
 }
 
-//
-// var userService = service.NewUserService() // 能用但不推荐，代码写死了，
-
 // ================= 登录 =================
 
 // @Summary 用户登录
@@ -54,7 +51,7 @@ func (u *userController) Login(c *gin.Context) {
 		return
 	}
 
-	user, token, err := u.userService.Login(req.Username, req.Password)
+	user, token, err := u.userService.Login(c, req.Username, req.Password)
 	if err != nil {
 		v1.Unauthorized(c, "用户名或密码不对") // 401 用户名或密码不对
 		return
@@ -83,7 +80,7 @@ func (u *userController) Create(c *gin.Context) {
 		return
 	}
 
-	user, err := u.userService.Create(req.Username, req.Password)
+	user, err := u.userService.Create(c, req.Username, req.Password)
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
@@ -100,9 +97,12 @@ func (u *userController) Create(c *gin.Context) {
 // @Success 200 {object} userdto.UserPrivateDTO
 // @Router /user/info [get]
 func (u *userController) GetUserInfo(c *gin.Context) {
-	userID := v1.GetUserID(c)
 
-	user, err := u.userService.GetUserDetail(userID)
+	// userID := v1.GetUserID(c)
+	userID := GetUserIdFromCtx(c)
+	fmt.Print(userID, "userID")
+
+	user, err := u.userService.GetUserDetail(c, userID)
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
@@ -135,9 +135,9 @@ func (u *userController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	userID := v1.GetUserID(c)
+	userID := GetUserIdFromCtx(c)
 
-	user, err := u.userService.UpdateUser(userModel, userID)
+	user, err := u.userService.UpdateUser(c, userModel, userID)
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
@@ -165,13 +165,13 @@ func (u *userController) GetUserDetail(c *gin.Context) {
 		return
 	}
 
-	user, err := u.userService.GetUserDetail(uint(id))
+	user, err := u.userService.GetUserDetail(c, uint(id))
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
 	}
 
-	currentUserID := v1.GetUserID(c)
+	currentUserID := GetUserIdFromCtx(c)
 
 	// 权限控制：自己 vs 他人
 	if currentUserID == uint(id) {
@@ -200,7 +200,7 @@ func (u *userController) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	currentUserID := v1.GetUserID(c)
+	currentUserID := GetUserIdFromCtx(c)
 
 	// 只允许删除自己（可扩展管理员）
 	if currentUserID != uint(id) {
@@ -208,7 +208,7 @@ func (u *userController) DeleteUser(c *gin.Context) {
 		return
 	}
 	fmt.Print(idStr, "9999\n")
-	if err := u.userService.DeleteUser(uint(id)); err != nil {
+	if err := u.userService.DeleteUser(c, uint(id)); err != nil {
 		v1.BadRequest(c, err.Error())
 		return
 	}
@@ -223,7 +223,7 @@ func (u *userController) DeleteUser(c *gin.Context) {
 // @Success 200 {object} []userdto.UserPublicDTO
 // @Router /users [get]
 func (u *userController) GetUserList(c *gin.Context) {
-	users, err := u.userService.GetUserList()
+	users, err := u.userService.GetUserList(c)
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
@@ -244,7 +244,7 @@ func (u *userController) GetUserList(c *gin.Context) {
 func (u *userController) GetUserLists(c *gin.Context) {
 	page, pageSize := v1.GetPage(c)
 
-	users, total, err := u.userService.GetUserLists(page, pageSize)
+	users, total, err := u.userService.GetUserLists(c, page, pageSize)
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return

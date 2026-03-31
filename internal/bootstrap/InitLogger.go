@@ -11,7 +11,7 @@ import (
 var Logger *zap.SugaredLogger
 
 // 简单全局日志
-func InitLogger(LOGConfig config.LogConfig) {
+func InitLogger(LOGConfig config.LogConfig) *zap.SugaredLogger {
 	// 1. 配置日志写入位置 (使用 lumberjack 实现自动切割)
 	writeSyncer := zapcore.AddSync(&lumberjack.Logger{
 		Filename:   LOGConfig.LogFileName, // 日志文件路径 (确保 logs 目录存在)
@@ -38,4 +38,6 @@ func InitLogger(LOGConfig config.LogConfig) {
 
 	// 注意：不要在这里调用 Sync()，应该在程序退出时调用
 	Logger.Info("日志系统初始化成功，日志将写入 logs/app.log")
+
+	return Logger
 }

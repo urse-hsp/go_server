@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"go-server/internal/bootstrap"
@@ -10,27 +11,33 @@ import (
 )
 
 type UserRepository interface {
-	GetUserByID(id uint) (*model.User, error)
-	GetUserByUsername(username string) (*model.User, error)
-	CreateUser(username string, password string) (*model.User, error)
-	UpdateUser(info model.User, id uint) (*model.User, error)
-	DeleteUser(id uint) error
-	GetUserList() ([]model.User, error)
-	GetUserLists(page, pageSize int) ([]model.User, int64, error)
+	GetUserByID(ctx context.Context, id uint) (*model.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*model.User, error)
+	CreateUser(ctx context.Context, username string, password string) (*model.User, error)
+	UpdateUser(ctx context.Context, info model.User, id uint) (*model.User, error)
+	DeleteUser(ctx context.Context, id uint) error
+	GetUserList(ctx context.Context) ([]model.User, error)
+	GetUserLists(ctx context.Context, page, pageSize int) ([]model.User, int64, error)
 }
 
-type userRepository struct{}
+func NewUserRepository(
+	r *bootstrap.Repository,
+) UserRepository {
+	return &userRepository{
+		Repository: r,
+	}
+}
 
-func NewUserRepository() UserRepository {
-	return &userRepository{}
+type userRepository struct {
+	*bootstrap.Repository
 }
 
 // ================= 根据ID查询 =================
 
-func (e *userRepository) GetUserByID(id uint) (*model.User, error) {
+func (r *userRepository) GetUserByID(ctx context.Context, id uint) (*model.User, error) {
 	var user model.User
 
-	err := bootstrap.DB.First(&user, id).Error
+	err := r.DB(ctx).First(&user, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -40,10 +47,10 @@ func (e *userRepository) GetUserByID(id uint) (*model.User, error) {
 
 // ================= 根据用户名查询 =================
 
-func (e *userRepository) GetUserByUsername(username string) (*model.User, error) {
+func (r *userRepository) GetUserByUsername(ctx context.Context, username string) (*model.User, error) {
 	var user model.User
 
-	err := bootstrap.DB.Where("username = ?", username).First(&user).Error
+	err := r.DB(ctx).Where("username = ?", username).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -53,9 +60,9 @@ func (e *userRepository) GetUserByUsername(username string) (*model.User, error)
 
 // ================= 创建用户 =================
 
-func (e *userRepository) CreateUser(username string, password string) (*model.User, error) {
+func (r *userRepository) CreateUser(ctx context.Context, username string, password string) (*model.User, error) {
 	// 判断是否已存在
-	_, err := e.GetUserByUsername(username)
+	_, err := r.GetUserByUsername(ctx, username)
 
 	if err == nil {
 		return nil, fmt.Errorf("用户名已存在")
@@ -72,7 +79,7 @@ func (e *userRepository) CreateUser(username string, password string) (*model.Us
 		// CreatedAt: time.Now(),
 	}
 
-	if err := bootstrap.DB.Create(user).Error; err != nil {
+	if err := r.DB(ctx).Create(user).Error; err != nil {
 		return nil, err
 	}
 
@@ -81,8 +88,8 @@ func (e *userRepository) CreateUser(username string, password string) (*model.Us
 
 // ================= 更新用户 =================
 
-func (e *userRepository) UpdateUser(user model.User, id uint) (*model.User, error) {
-	result := bootstrap.DB.Model(&model.User{}).
+func (r *userRepository) UpdateUser(ctx context.Context, user model.User, id uint) (*model.User, error) {
+	result := r.DB(ctx).Model(&model.User{}).
 		Where("id = ?", id).
 		Updates(&user)
 
@@ -96,7 +103,7 @@ func (e *userRepository) UpdateUser(user model.User, id uint) (*model.User, erro
 
 	// 重新查询最新数据（关键）
 	var updatedUser model.User
-	if err := bootstrap.DB.First(&updatedUser, id).Error; err != nil {
+	if err := r.DB(ctx).First(&updatedUser, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -105,8 +112,8 @@ func (e *userRepository) UpdateUser(user model.User, id uint) (*model.User, erro
 
 // ================= 删除用户 =================
 
-func (e *userRepository) DeleteUser(id uint) error {
-	result := bootstrap.DB.Where("id = ?", id).Delete(&model.User{})
+func (r *userRepository) DeleteUser(ctx context.Context, id uint) error {
+	result := r.DB(ctx).Where("id = ?", id).Delete(&model.User{})
 
 	if result.Error != nil {
 		return result.Error
@@ -121,10 +128,10 @@ func (e *userRepository) DeleteUser(id uint) error {
 
 // ================= 用户列表 =================
 
-func (e *userRepository) GetUserList() ([]model.User, error) {
+func (r *userRepository) GetUserList(ctx context.Context) ([]model.User, error) {
 	var users []model.User
 
-	if err := bootstrap.DB.Find(&users).Error; err != nil {
+	if err := r.DB(ctx).Find(&users).Error; err != nil {
 		return nil, err
 	}
 
@@ -133,10 +140,10 @@ func (e *userRepository) GetUserList() ([]model.User, error) {
 
 // ================= 用户列表 分页 =================
 
-func (e *userRepository) GetUserLists(page, pageSize int) ([]model.User, int64, error) {
+func (r *userRepository) GetUserLists(ctx context.Context, page, pageSize int) ([]model.User, int64, error) {
 	var users []model.User
 
-	db := bootstrap.DB.Model(&model.User{})
+	db := r.DB(ctx).Model(&model.User{})
 
 	// 分页
 	total, err := Paginate(db, &users, page, pageSize)

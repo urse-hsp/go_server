@@ -9,13 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitUserRouter(r *gin.RouterGroup) {
+func InitUserRouter(deps RouterDeps, r *gin.RouterGroup) {
 	// ================= 用户模块 =================
 	user := r.Group("/user")
 
-	userRepository := dao.NewUserRepository()                   // dao
-	userService := service.NewUserService(userRepository)       // service
-	userController := controller.NewUserController(userService) // controller
+	userRepository := dao.NewUserRepository(deps.Repository)            // dao
+	userService := service.NewUserService(deps.Service, userRepository) // service
+	userController := controller.NewUserController(userService)         // controller
 	{
 		// ✅ 不需要登录
 		user.POST("/login", userController.Login)
@@ -23,7 +23,7 @@ func InitUserRouter(r *gin.RouterGroup) {
 
 		// ✅ 需要登录（只针对“自己”）
 		auth := user.Group("/")
-		auth.Use(middleware.AuthMiddleware())
+		auth.Use(middleware.StrictAuth(deps.JWT, deps.Logger)) // 依赖注入 JWT 和 Logger
 		{
 			auth.DELETE("/:id", userController.DeleteUser)
 			auth.GET("/info", userController.GetUserInfo) // 自己

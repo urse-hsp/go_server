@@ -1,51 +1,69 @@
 package jwt
 
+// JWT 工具层（Token 的生成 + 解析）
+
 import (
-	"go-server/config"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/spf13/viper"
 )
 
-// Claims 定义 Token 中携带的数据结构
-type Claims struct {
-	UserID   uint   `json:"user_id"`
-	UserName string `json:"user_name"`
+type JWT struct {
+	key []byte
+}
+
+type MyCustomClaims struct {
+	UserId uint `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
-func GetJWTSecret() []byte {
-	// var secret = []byte("secret")
-	return []byte(config.Conf.JWT.Secret)
+// 签名
+func NewJwt(conf *viper.Viper) *JWT {
+	return &JWT{key: []byte(conf.GetString("security.jwt.secret"))} // 配置里拿密钥
 }
 
-func GenerateToken(userID uint, username string) (string, error) {
-	duration := time.Duration(config.Conf.JWT.ExpireTime) * time.Hour
+// 生成 Token
+func (j *JWT) GenToken(userId uint, expiresAt time.Time) (string, error) {
 
-	claims := Claims{
-		UserID:   userID,
-		UserName: username,
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, MyCustomClaims{
+		UserId: userId,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			Issuer:    "",
+			Subject:   "",
+			ID:        "",
+			Audience:  []string{},
 		},
-	}
+	})
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(GetJWTSecret())
+	// Sign and get the complete encoded token as a string using the key
+	tokenString, err := token.SignedString(j.key)
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }
 
-// parseToken 解析和验证 Token 的辅助函数
-func ParseToken(tokenString string) (*jwt.Token, error) {
-	// 定义你的密钥（实际项目中最好放在环境变量里）
-	// var jwtKey = []byte("your_secret_key")
-	var jwtKey = GetJWTSecret()
-
-	return jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		// 校验签名算法
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.ErrTokenInvalidClaims
-		}
-		return jwtKey, nil
+// 解析 Token
+func (j *JWT) ParseToken(tokenString string) (*MyCustomClaims, error) {
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+	if strings.TrimSpace(tokenString) == "" {
+		return nil, errors.New("token is empty")
+	}
+	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return j.key, nil
 	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
+		return claims, nil
+	} else {
+		return nil, err
+	}
 }

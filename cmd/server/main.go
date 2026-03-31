@@ -1,9 +1,13 @@
 package main
 
 import (
-	"go-server/config"
 	"go-server/internal/bootstrap"
 	"go-server/internal/router"
+	"go-server/internal/service"
+	"go-server/pkg/config"
+	"go-server/pkg/jwt"
+	"go-server/pkg/log"
+	"go-server/pkg/sid"
 )
 
 // @title go-server API
@@ -12,18 +16,34 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-	// 初始化配置
-	if err := config.InitConfig(); err != nil {
-		panic(err)
-	}
-	// 初始化各种组件
-	bootstrap.InitMysql()
-	bootstrap.InitRedis()
+	envConf := "config/local.yaml"
+	conf := config.NewConfig(envConf)
 
-	//  初始化日志
-	bootstrap.InitLogger(config.Conf.Log)
+	// 初始化组件
+	logger := log.NewLog(conf)          // 初始化日志
+	DB := bootstrap.NewDB(conf, logger) // 初始化 MySQL
+	RDB := bootstrap.NewRedis(conf)     // 初始化 Redis
+
+	repositoryRepository := bootstrap.NewRepository(logger, DB, RDB) // 初始化 Repository，注入 Logger 和 DB
+	transaction := bootstrap.NewTransaction(repositoryRepository)    // 初始化 Transaction，注入 Repository
+
+	sidSid := sid.NewSid()
+	jwtJWT := jwt.NewJwt(conf)
+	if jwtJWT == nil {
+		panic("jwt init failed")
+	}
+
+	serviceService := service.NewService(transaction, logger, sidSid, jwtJWT) // 初始化 Service，注入 Transaction、Logger、Sid 和 JWT
+
+	routerDeps := router.RouterDeps{
+		Logger:     logger,
+		Config:     conf,
+		Repository: repositoryRepository,
+		Service:    serviceService,
+		JWT:        jwtJWT,
+	}
 
 	// 启动服务
-	r := router.SetupRouter() // gin router 应用实例
-	r.Run(":" + config.Conf.Server.Port)
+	r := router.SetupRouter(routerDeps) // gin router 应用实例
+	r.Run(":" + conf.GetString("server.port"))
 }
