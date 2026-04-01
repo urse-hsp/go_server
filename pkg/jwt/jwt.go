@@ -20,7 +20,6 @@ type MyCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-// 签名
 func NewJwt(conf *viper.Viper) *JWT {
 	return &JWT{key: []byte(conf.GetString("security.jwt.secret"))} // 配置里拿密钥
 }

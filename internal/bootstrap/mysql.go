@@ -6,36 +6,12 @@ import (
 	"go-server/pkg/zapgorm2"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-type Repository struct {
-	db  *gorm.DB
-	rdb *redis.Client
-	//mongo  *mongo.Client
-	logger *log.Logger
-}
-
-// Repository 负责数据库连接和事务管理
-func NewRepository(
-	logger *log.Logger,
-	db *gorm.DB,
-	rdb *redis.Client,
-	// mongo *mongo.Client,
-) *Repository {
-	return &Repository{
-		db:  db,
-		rdb: rdb,
-		//mongo:  mongo,
-		logger: logger,
-	}
-}
-
-// 事物接口
-// 将数据库事务的执行逻辑抽象化
+// 事物接口。将数据库事务的执行逻辑抽象化
 type Transaction interface {
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
 }

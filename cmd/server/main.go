@@ -24,8 +24,8 @@ func main() {
 	DB := bootstrap.NewDB(conf, logger) // 初始化 MySQL
 	RDB := bootstrap.NewRedis(conf)     // 初始化 Redis
 
-	repositoryRepository := bootstrap.NewRepository(logger, DB, RDB) // 初始化 Repository，注入 Logger 和 DB
-	transaction := bootstrap.NewTransaction(repositoryRepository)    // 初始化 Transaction，注入 Repository
+	repositoryRepository := bootstrap.NewRepository(logger, DB, RDB) // 初始化 Repository/dao，注入 Logger,DB,RDB
+	transaction := bootstrap.NewTransaction(repositoryRepository)    // 初始化 Transaction，注入 Repository/dao
 
 	sidSid := sid.NewSid()
 	jwtJWT := jwt.NewJwt(conf)
