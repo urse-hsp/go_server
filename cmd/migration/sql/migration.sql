@@ -1,2 +1,1 @@
--- migration.sql
--- 统一管理数据库结构变更
+ALTER TABLE users DROP COLUMN avatars;

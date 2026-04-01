@@ -1,39 +1,29 @@
 // migration 执行器
 // 每次启动都会执行所有 SQL
-package migration
+package main
 
 import (
-	"fmt"
 	"go-server/internal/bootstrap"
 	"go-server/pkg/config"
 	"go-server/pkg/log"
-	"io/ioutil"
-	"path/filepath"
+	"os"
+
+	"go.uber.org/zap"
 )
 
 // 迁移数据库
-func RunMigrations() {
-	files, err := filepath.Glob("./*.sql")
-	if err != nil {
-		panic(err)
+func main() {
+	conf := config.NewConfig("config/local.yaml")
+	logger := log.NewLog(conf)
+
+	db := bootstrap.NewDB(conf, logger)
+	m := bootstrap.NewMigrateServer(db, logger)
+
+	if err := m.Start(); err != nil {
+		logger.Error("migration failed", zap.Error(err))
+		os.Exit(1)
 	}
 
-	envConf := "config/local.yaml"
-	conf := config.NewConfig(envConf)
-	logger := log.NewLog(conf)          // 初始化日志
-	DB := bootstrap.NewDB(conf, logger) // 初始化 MySQL
+	logger.Info("migration done")
 
-	for _, file := range files {
-		fmt.Println("执行 migration:", file)
-
-		sqlBytes, err := ioutil.ReadFile(file)
-		if err != nil {
-			panic(err)
-		}
-
-		err = DB.Exec(string(sqlBytes)).Error
-		if err != nil {
-			panic("执行失败: " + file + " | " + err.Error())
-		}
-	}
 }

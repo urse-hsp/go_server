@@ -1,3 +1,6 @@
+make migrate
+make run
+
 # scripts
 	go mod tidy 
 	更新依赖

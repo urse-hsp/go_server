@@ -12,4 +12,5 @@ type User struct {
 	Age       int       `gorm:"not null; default: 0;comment:年龄"`
 	Email     string    `gorm:"type:varchar(100);not null;comment:电子邮件"`
 	Phone     string    `gorm:"type:varchar(20);not null;comment:手机号"`
+	Gender    string    `gorm:"type:varchar(10);not null;comment:性别"`
 }
