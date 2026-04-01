@@ -1,4 +1,13 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+
 # --- 编译产物 ---
+
 # air 生成的临时目录，必须忽略
 tmp/ 
 bin/
