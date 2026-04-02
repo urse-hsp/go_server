@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"go-server/internal/model"
 	"go-server/pkg/log"
 	"os"
 	"path/filepath"
@@ -24,10 +25,10 @@ func NewMigrateServer(db *gorm.DB, log *log.Logger) *MigrateServer {
 
 // Start 入口
 func (m *MigrateServer) Start() error {
-	// // 1. AutoMigrate（仅开发/初始化用）
-	// if err := m.db.AutoMigrate(model.GetModels()...); err != nil {
-	// 	return err
-	// }
+	// 1. AutoMigrate（仅开发/初始化用）
+	if err := m.db.AutoMigrate(model.GetModels()...); err != nil {
+		return err
+	}
 
 	m.log.Info("AutoMigrate success")
 

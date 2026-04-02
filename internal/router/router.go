@@ -2,6 +2,7 @@ package router
 
 import (
 	"go-server/internal/bootstrap"
+	"go-server/internal/controller"
 	"go-server/internal/middleware"
 	"go-server/internal/service"
 	"go-server/pkg/jwt"
@@ -14,8 +15,9 @@ import (
 type RouterDeps struct {
 	Logger     *log.Logger
 	Config     *viper.Viper
-	Repository *bootstrap.Repository
-	Service    *service.Service
+	Repository *bootstrap.Repository // dao层工具包
+	Service    *service.Service      // 业务层工具包
+	Handler    *controller.Handler   // 控制层工具包
 	JWT        *jwt.JWT
 }
 

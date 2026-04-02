@@ -1,12 +1,12 @@
-package service
+package demo
 
 import (
 	"context"
 	"fmt"
 	"go-server/internal/dao"
 	"go-server/internal/model"
+	"go-server/internal/service"
 	"go-server/pkg/bcrypt"
-	"time"
 )
 
 type UserService interface {
@@ -21,7 +21,7 @@ type UserService interface {
 }
 
 func NewUserService(
-	service *Service,
+	service *service.Service,
 	userRepo dao.UserRepository,
 ) UserService {
 	return &userService{
@@ -31,7 +31,7 @@ func NewUserService(
 }
 
 type userService struct {
-	*Service
+	*service.Service
 	userRepo dao.UserRepository
 }
 
@@ -47,14 +47,14 @@ func (s *userService) Login(ctx context.Context, username string, password strin
 		return nil, "", fmt.Errorf("密码错误")
 	}
 
-	// token, err := jwt.GenerateToken(user.ID, user.Username)
-	// duration := time.Duration(s.) * time.Hour
-	token, err := s.jwt.GenToken(user.ID, time.Now().Add(time.Hour*24*90))
-	if err != nil {
-		return nil, "", err
-	}
+	// token, err := s.jwt.GenToken(user.ID, time.Now().Add(time.Hour*24*90))
+	// if err != nil {
+	// 	return nil, "", err
+	// }
 
-	return user, token, nil
+	// return user, token, nil
+
+	return user, "", nil
 }
 
 // ================= 注册 =================

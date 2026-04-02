@@ -63,6 +63,20 @@ info:
   title: go-server API
   version: "1.0"
 paths:
+  /user:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/userdto.UserPublicDTO'
+            type: array
+      summary: 用户列表
+      tags:
+      - 用户
   /user/{id}:
     delete:
       parameters:
@@ -79,6 +93,23 @@ paths:
           schema:
             type: string
       summary: 删除用户
+      tags:
+      - 用户
+    get:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userdto.UserPublicDTO'
+      summary: 获取用户详情
       tags:
       - 用户
   /user/info:
@@ -111,6 +142,18 @@ paths:
           schema:
             $ref: '#/definitions/userdto.UserPrivateDTO'
       summary: 更新当前用户
+      tags:
+      - 用户
+  /user/lists:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.PageResponse'
+      summary: 用户列表 分页
       tags:
       - 用户
   /user/login:
@@ -154,50 +197,6 @@ paths:
           schema:
             $ref: '#/definitions/userdto.UserPrivateDTO'
       summary: 用户注册
-      tags:
-      - 用户
-  /users:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/userdto.UserPublicDTO'
-            type: array
-      summary: 用户列表
-      tags:
-      - 用户
-  /users/{id}:
-    get:
-      parameters:
-      - description: 用户ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/userdto.UserPublicDTO'
-      summary: 获取用户详情
-      tags:
-      - 用户
-  /users/list:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.PageResponse'
-      summary: 用户列表 分页
       tags:
       - 用户
 swagger: "2.0"

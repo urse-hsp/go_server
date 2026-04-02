@@ -1,8 +1,9 @@
-package controller
+package demo
 
 import (
 	"fmt"
 	v1 "go-server/api/v1"
+	"go-server/internal/controller"
 	userdto "go-server/internal/dto/user"
 	"go-server/internal/model"
 	"go-server/internal/service"
@@ -12,27 +13,25 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-// type UserController interface {
-// 	Login(c *gin.Context) // 登录
-// 	Get(c *gin.Context)   // 当前token信息
+type UserController interface {
+	Login(c *gin.Context) // 登录
+	Get(c *gin.Context)   // 当前token信息
 
-// 	Create(c *gin.Context)    // 注册
-// 	Delete(c *gin.Context)    // 删除
-// 	Update(c *gin.Context)    // 更新
-// 	GetDetail(c *gin.Context) // 详情
-// 	GetList(c *gin.Context)   // 全部列表
-// 	GetLists(c *gin.Context)  // 分页列表
-// }
+	Create(c *gin.Context)    // 注册
+	Delete(c *gin.Context)    // 删除
+	Update(c *gin.Context)    // 更新
+	GetDetail(c *gin.Context) // 详情
+	GetList(c *gin.Context)   // 全部列表
+	GetLists(c *gin.Context)  // 分页列表
+}
 
-func NewUserController(handler *Handler, s service.UserService) *userController {
+func NewUserController(s service.UserService) UserController {
 	return &userController{
-		Handler:     handler,
 		userService: s,
 	}
 }
 
 type userController struct {
-	*Handler
 	userService service.UserService // 依赖注入
 }
 
@@ -46,6 +45,7 @@ type userController struct {
 // @Param data body userdto.LoginRequest true "登录参数"
 // @Success 200 {object} userdto.LoginResponse
 // @Router /user/login [post]
+
 func (u *userController) Login(c *gin.Context) {
 	var req userdto.LoginRequest
 
@@ -75,6 +75,7 @@ func (u *userController) Login(c *gin.Context) {
 // @Param data body userdto.LoginRequest true "注册参数"
 // @Success 200 {object} userdto.UserPrivateDTO
 // @Router /user/register [post]
+
 func (u *userController) Create(c *gin.Context) {
 	var req userdto.LoginRequest
 
@@ -100,6 +101,7 @@ func (u *userController) Create(c *gin.Context) {
 // @Param id path int true "用户ID"
 // @Success 204 {string} string "No Content"
 // @Router /user/{id} [delete]
+
 func (u *userController) Delete(c *gin.Context) {
 	fmt.Print("删除用户\n")
 
@@ -111,7 +113,7 @@ func (u *userController) Delete(c *gin.Context) {
 		return
 	}
 
-	currentUserID := GetUserIdFromCtx(c)
+	currentUserID := controller.GetUserIdFromCtx(c)
 
 	// 只允许删除自己（可扩展管理员）
 	if currentUserID != uint(id) {
@@ -136,6 +138,7 @@ func (u *userController) Delete(c *gin.Context) {
 // @Param data body userdto.UserUpdateRequest true "更新参数"
 // @Success 200 {object} userdto.UserPrivateDTO
 // @Router /user/info [put]
+
 func (u *userController) Update(c *gin.Context) {
 	var req userdto.UserUpdateRequest
 
@@ -151,7 +154,7 @@ func (u *userController) Update(c *gin.Context) {
 		return
 	}
 
-	userID := GetUserIdFromCtx(c)
+	userID := controller.GetUserIdFromCtx(c)
 
 	user, err := u.userService.Update(c, userModel, userID)
 	if err != nil {
@@ -169,9 +172,10 @@ func (u *userController) Update(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} userdto.UserPrivateDTO
 // @Router /user/info [get]
+
 func (u *userController) Get(c *gin.Context) {
 	// userID := v1.GetUserID(c)
-	userID := GetUserIdFromCtx(c)
+	userID := controller.GetUserIdFromCtx(c)
 	fmt.Print(userID, "userID")
 
 	user, err := u.userService.GetDetail(c, userID)
@@ -191,6 +195,7 @@ func (u *userController) Get(c *gin.Context) {
 // @Param id path int true "用户ID"
 // @Success 200 {object} userdto.UserPublicDTO
 // @Router /user/{id} [get]
+
 func (u *userController) GetDetail(c *gin.Context) {
 	idStr := c.Param("id")
 
@@ -208,7 +213,7 @@ func (u *userController) GetDetail(c *gin.Context) {
 		return
 	}
 
-	currentUserID := GetUserIdFromCtx(c)
+	currentUserID := controller.GetUserIdFromCtx(c)
 
 	// 权限控制：自己 vs 他人
 	if currentUserID == uint(id) {
@@ -224,6 +229,7 @@ func (u *userController) GetDetail(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} []userdto.UserPublicDTO
 // @Router /user [get]
+
 func (u *userController) GetList(c *gin.Context) {
 	users, err := u.userService.GetList(c)
 	if err != nil {
@@ -243,6 +249,7 @@ func (u *userController) GetList(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} v1.PageResponse
 // @Router /user/lists [get]
+
 func (u *userController) GetLists(c *gin.Context) {
 	page, pageSize := v1.GetPage(c)
 

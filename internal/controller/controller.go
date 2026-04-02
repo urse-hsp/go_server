@@ -2,21 +2,22 @@ package controller
 
 import (
 	"go-server/pkg/jwt"
+	"go-server/pkg/log"
 
 	"github.com/gin-gonic/gin"
 )
 
-// type Handler struct {
-// 	logger *log.Logger
-// }
+type Handler struct {
+	logger *log.Logger
+}
 
-// func NewHandler(
-// 	logger *log.Logger,
-// ) *Handler {
-// 	return &Handler{
-// 		logger: logger,
-// 	}
-// }
+func NewHandler(
+	logger *log.Logger,
+) *Handler {
+	return &Handler{
+		logger: logger,
+	}
+}
 
 func GetUserIdFromCtx(ctx *gin.Context) uint {
 	v, exists := ctx.Get("claims")

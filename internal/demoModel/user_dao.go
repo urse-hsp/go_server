@@ -1,10 +1,11 @@
-package dao
+package demo
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"go-server/internal/bootstrap"
+	"go-server/internal/dao"
 	"go-server/internal/model"
 
 	"gorm.io/gorm"
@@ -147,7 +148,7 @@ func (r *userRepository) GetLists(ctx context.Context, page, pageSize int) ([]mo
 	db := r.DB(ctx).Model(&model.User{})
 
 	// 分页
-	total, err := Paginate(db, &users, page, pageSize)
+	total, err := dao.Paginate(db, &users, page, pageSize)
 
 	return users, total, err
 }

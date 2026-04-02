@@ -2,6 +2,7 @@ package main
 
 import (
 	"go-server/internal/bootstrap"
+	"go-server/internal/controller"
 	"go-server/internal/router"
 	"go-server/internal/service"
 	"go-server/pkg/config"
@@ -34,13 +35,15 @@ func main() {
 	}
 
 	serviceService := service.NewService(transaction, logger, sidSid, jwtJWT) // 初始化 Service，注入 Transaction、Logger、Sid 和 JWT
+	Handler := controller.NewHandler(logger)                                  // 初始化 Handler
 
 	routerDeps := router.RouterDeps{
 		Logger:     logger,
 		Config:     conf,
+		JWT:        jwtJWT,
 		Repository: repositoryRepository,
 		Service:    serviceService,
-		JWT:        jwtJWT,
+		Handler:    Handler,
 	}
 
 	// 启动服务

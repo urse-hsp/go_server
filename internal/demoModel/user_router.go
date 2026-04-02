@@ -1,15 +1,16 @@
-package router
+package demo
 
 import (
 	"go-server/internal/controller"
 	"go-server/internal/dao"
 	"go-server/internal/middleware"
+	"go-server/internal/router"
 	"go-server/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-func InitUserRouter(deps RouterDeps, r *gin.RouterGroup) {
+func InitUserRouter(deps router.RouterDeps, r *gin.RouterGroup) {
 	// ================= 用户模块 =================
 	// 初始化依赖
 	userRepository := dao.NewUserRepository(deps.Repository)                  // dao
