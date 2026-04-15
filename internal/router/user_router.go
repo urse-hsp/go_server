@@ -17,22 +17,23 @@ func InitUserRouter(deps RouterDeps, r *gin.RouterGroup) {
 	userController := controller.NewUserController(deps.Handler, userService) // controller
 
 	user := r.Group("/user")
+	// ✅ 不需要登录
 	{
-		// ✅ 不需要登录
 		user.POST("/login", userController.Login)
 		user.POST("/register", userController.Create)
-
-		// ✅ 需要登录
-		auth := user.Group("/")
-		auth.Use(middleware.StrictAuth(deps.JWT, deps.Logger)) // 依赖注入 JWT 和 Logger
-		{
-			auth.DELETE("/:id", userController.Delete) // 删除自己
-			auth.PUT("/info", userController.Update)   // 修改自己
-			auth.GET("/info", userController.Get)      // 当前toekn信息
-
-			auth.GET("/:id", userController.GetDetail)  // 👈 detail
-			auth.GET("/", userController.GetList)       // 用户列表
-			auth.GET("/lists", userController.GetLists) // 分页用户列表
-		}
+	}
+	// ✅ 需要登录
+	strictAuthRouter := user.Group("").Use(middleware.StrictAuth(deps.JWT, deps.Logger))
+	{
+		strictAuthRouter.DELETE("/:id", userController.Delete) // 删除
+		strictAuthRouter.PUT("/info", userController.Update)   // 修改
+		strictAuthRouter.GET("/info", userController.Get)      // 当前toekn信息
+	}
+	// ✅ 不强制登录
+	noStrictAuth := user.Group("").Use(middleware.NoStrictAuth(deps.JWT, deps.Logger))
+	{
+		noStrictAuth.GET("/lists", userController.GetPageList) // 分页列表
+		noStrictAuth.GET("", userController.GetList)           // 列表
+		noStrictAuth.GET("/:id", userController.GetDetail)     // detail
 	}
 }

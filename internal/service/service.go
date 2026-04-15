@@ -30,3 +30,10 @@ func NewService(
 		tm:     tm,
 	}
 }
+
+// 手动判空赋值
+func AssignIfNotNil[T any](dst *T, src *T) {
+	if src != nil {
+		*dst = *src
+	}
+}

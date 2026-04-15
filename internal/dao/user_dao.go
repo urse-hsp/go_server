@@ -2,23 +2,24 @@ package dao
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"go-server/internal/bootstrap"
+	userdto "go-server/internal/dto/user"
 	"go-server/internal/model"
 
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	GetByUsername(ctx context.Context, username string) (*model.User, error)
-
-	Create(ctx context.Context, username string, password string) (*model.User, error)
+	Create(ctx context.Context, data *model.User) (*model.User, error)
 	Delete(ctx context.Context, id uint) error
-	Update(ctx context.Context, info model.User, id uint) (*model.User, error)
+	Update(ctx context.Context, data *model.User, id uint) (*model.User, error)
 	GetDetail(ctx context.Context, id uint) (*model.User, error)
-	GetList(ctx context.Context) ([]model.User, error)
-	GetLists(ctx context.Context, page, pageSize int) ([]model.User, int64, error)
+	GetList(ctx context.Context, q userdto.RequestQuery) ([]model.User, error)
+	GetPageList(ctx context.Context, q userdto.RequestPageQuery) ([]model.User, int64, error)
+
+	buildQuery(ctx context.Context, q userdto.RequestQuery) *gorm.DB
+	GetByKeyWhere(ctx context.Context, name string) (*model.User, error)
 }
 
 func NewUserRepository(
@@ -36,79 +37,51 @@ type userRepository struct {
 // ================= 根据ID查询 =================
 
 func (r *userRepository) GetDetail(ctx context.Context, id uint) (*model.User, error) {
-	var user model.User
+	var data model.User
 
-	err := r.DB(ctx).First(&user, id).Error
+	err := r.DB(ctx).First(&data, id).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return &data, nil
 }
 
 // ================= 根据关键字查询 =================
 
-func (r *userRepository) GetByUsername(ctx context.Context, username string) (*model.User, error) {
-	var user model.User
+func (r *userRepository) GetByKeyWhere(ctx context.Context, name string) (*model.User, error) {
+	var data model.User
 
-	err := r.DB(ctx).Where("username = ?", username).First(&user).Error
+	err := r.DB(ctx).Where("username = ?", name).First(&data).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return &data, nil
 }
 
 // ================= 创建 =================
 
-func (r *userRepository) Create(ctx context.Context, username string, password string) (*model.User, error) {
-	// 判断是否已存在
-	_, err := r.GetByUsername(ctx, username)
+func (r *userRepository) Create(ctx context.Context, data *model.User) (*model.User, error) {
 
-	if err == nil {
-		return nil, fmt.Errorf("用户名已存在")
-	}
-
-	// 如果不是“未找到”，说明是数据库错误
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := r.DB(ctx).Create(data).Error; err != nil {
 		return nil, err
 	}
 
-	user := &model.User{
-		Username: username,
-		Password: password,
-		// CreatedAt: time.Now(),
-	}
-
-	if err := r.DB(ctx).Create(user).Error; err != nil {
-		return nil, err
-	}
-
-	return user, nil
+	return data, nil
 }
 
 // ================= 更新 =================
 
-func (r *userRepository) Update(ctx context.Context, user model.User, id uint) (*model.User, error) {
-	result := r.DB(ctx).Model(&model.User{}).
+func (r *userRepository) Update(ctx context.Context, data *model.User, id uint) (*model.User, error) {
+	if err := r.DB(ctx).
+		Model(&model.User{}).
 		Where("id = ?", id).
-		Updates(&user)
-
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return nil, fmt.Errorf("用户不存在")
-	}
-
-	// 重新查询最新数据（关键）
-	var updatedUser model.User
-	if err := r.DB(ctx).First(&updatedUser, id).Error; err != nil {
+		Updates(data).Error; err != nil {
 		return nil, err
 	}
 
-	return &updatedUser, nil
+	return r.GetDetail(ctx, id)
 }
 
 // ================= 删除 =================
@@ -121,7 +94,7 @@ func (r *userRepository) Delete(ctx context.Context, id uint) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("用户不存在")
+		return fmt.Errorf("id不存在")
 	}
 
 	return nil
@@ -129,25 +102,34 @@ func (r *userRepository) Delete(ctx context.Context, id uint) error {
 
 // ================= 全部列表 =================
 
-func (r *userRepository) GetList(ctx context.Context) ([]model.User, error) {
+func (r *userRepository) GetList(ctx context.Context, q userdto.RequestQuery) ([]model.User, error) {
 	var users []model.User
 
-	if err := r.DB(ctx).Find(&users).Error; err != nil {
-		return nil, err
-	}
+	db := r.buildQuery(ctx, q)
 
-	return users, nil
+	err := db.Find(&users).Error
+	return users, err
 }
 
 // ================= 分页列表 =================
 
-func (r *userRepository) GetLists(ctx context.Context, page, pageSize int) ([]model.User, int64, error) {
+func (r *userRepository) GetPageList(ctx context.Context, q userdto.RequestPageQuery) ([]model.User, int64, error) {
 	var users []model.User
 
-	db := r.DB(ctx).Model(&model.User{})
+	db := r.buildQuery(ctx, q.RequestQuery)
 
-	// 分页
-	total, err := Paginate(db, &users, page, pageSize)
+	total, err := Paginate(db, &users, q.Page, q.PageSize)
 
 	return users, total, err
+}
+
+// ================= 公共查询 =================
+func (r *userRepository) buildQuery(ctx context.Context, q userdto.RequestQuery) *gorm.DB {
+	db := r.DB(ctx).Model(&model.User{})
+
+	if q.Query != nil && *q.Query != "" {
+		db = db.Where("username LIKE ?", "%"+*q.Query+"%")
+	}
+
+	return db
 }

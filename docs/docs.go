@@ -24,6 +24,13 @@ const docTemplate = `{
                     "用户"
                 ],
                 "summary": "用户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "query",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -95,7 +102,24 @@ const docTemplate = `{
                 "tags": [
                     "用户"
                 ],
-                "summary": "用户列表 分页",
+                "summary": "用户列表-分页",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "query",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -164,8 +188,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/userdto.UserPrivateDTO"
                         }

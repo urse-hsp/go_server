@@ -16,7 +16,6 @@ import (
 
 // 严格认证（必须登录才能访问）
 func StrictAuth(j *jwt.JWT, logger *log.Logger) gin.HandlerFunc {
-
 	return func(ctx *gin.Context) {
 		if j == nil {
 			logger.Error("jwt not initialized")

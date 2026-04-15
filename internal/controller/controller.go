@@ -1,8 +1,11 @@
 package controller
 
 import (
+	"fmt"
+	v1 "go-server/api/v1"
 	"go-server/pkg/jwt"
 	"go-server/pkg/log"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,6 +22,17 @@ func NewHandler(
 	}
 }
 
+// 从请求中解析 uint 参数
+func ParseUintParam(c *gin.Context, key string) (uint, error) {
+	idStr := c.Param(key)
+	id64, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("无效的ID")
+	}
+	return uint(id64), nil
+}
+
+// 从上下文中获取用户信息
 func GetUserIdFromCtx(ctx *gin.Context) uint {
 	v, exists := ctx.Get("claims")
 	if !exists {
@@ -27,22 +41,15 @@ func GetUserIdFromCtx(ctx *gin.Context) uint {
 	return v.(*jwt.MyCustomClaims).UserId
 }
 
-// // 获取用户ID
-// func GetUserID(c *gin.Context) uint {
-// 	if v, ok := c.Get("user_id"); ok {
-// 		if userID, ok := v.(uint); ok {
-// 			return userID
-// 		}
-// 	}
-// 	return 0
-// }
+// path 参数解析工具函数
+func GetUintID(c *gin.Context, key string) (uint, bool) {
+	idStr := c.Param(key)
 
-// // 获取用户名
-// func GetUserName(c *gin.Context) string {
-// 	if v, ok := c.Get("user_name"); ok {
-// 		if name, ok := v.(string); ok {
-// 			return name
-// 		}
-// 	}
-// 	return ""
-// }
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		v1.BadRequest(c, "无效的"+key)
+		return 0, false
+	}
+
+	return uint(id), true
+}

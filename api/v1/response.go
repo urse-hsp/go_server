@@ -6,24 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Response struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg,omitempty"`
-	Data any    `json:"data,omitempty"`
-}
-
-type PageRequest struct {
-	Page     int `form:"page"`
-	PageSize int `form:"pageSize"`
-}
-
-type PageResponse struct {
-	Data     any `json:"data"`
-	Total    int `json:"total"`
-	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
-}
-
 // RESTful + 统一错误结构（混合模式）
 // 成功（RESTful）
 // 失败（统一 response）
@@ -48,11 +30,6 @@ func response(c *gin.Context, httpStatus int, code int, msg string, data any) {
 func Success(c *gin.Context, data any) {
 	writeJSON(c, http.StatusOK, data)
 }
-
-// // 200 带 msg
-// func SuccessWithMsg(c *gin.Context, data any, msg string) {
-// 	response(c, http.StatusOK, 0, msg, data)
-// }
 
 // 201
 func Created(c *gin.Context, data any) {

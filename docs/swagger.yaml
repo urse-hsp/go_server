@@ -65,6 +65,10 @@ info:
 paths:
   /user:
     get:
+      parameters:
+      - in: query
+        name: query
+        type: string
       produces:
       - application/json
       responses:
@@ -146,6 +150,16 @@ paths:
       - 用户
   /user/lists:
     get:
+      parameters:
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: query
+        type: string
       produces:
       - application/json
       responses:
@@ -153,7 +167,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/v1.PageResponse'
-      summary: 用户列表 分页
+      summary: 用户列表-分页
       tags:
       - 用户
   /user/login:
@@ -192,8 +206,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             $ref: '#/definitions/userdto.UserPrivateDTO'
       summary: 用户注册
