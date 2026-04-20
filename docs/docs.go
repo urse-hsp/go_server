@@ -37,7 +37,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/userdto.UserPublicDTO"
+                                "$ref": "#/definitions/userdto.PrivateDTO"
                             }
                         }
                     }
@@ -57,7 +57,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/userdto.UserPrivateDTO"
+                            "$ref": "#/definitions/userdto.PrivateDTO"
                         }
                     }
                 }
@@ -80,7 +80,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/userdto.UserUpdateRequest"
+                            "$ref": "#/definitions/userdto.UpdateRequest"
                         }
                     }
                 ],
@@ -88,7 +88,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/userdto.UserPrivateDTO"
+                            "$ref": "#/definitions/userdto.PrivateDTO"
                         }
                     }
                 }
@@ -105,14 +105,19 @@ const docTemplate = `{
                 "summary": "用户列表-分页",
                 "parameters": [
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "name": "page",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
+                        "maximum": 100,
+                        "minimum": 1,
                         "type": "integer",
                         "name": "pageSize",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -124,7 +129,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.PageResponse"
+                            "$ref": "#/definitions/userdto.UserPageResponse"
                         }
                     }
                 }
@@ -150,7 +155,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/userdto.LoginRequest"
+                            "$ref": "#/definitions/userdto.CreateRequest"
                         }
                     }
                 ],
@@ -183,7 +188,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/userdto.LoginRequest"
+                            "$ref": "#/definitions/userdto.CreateRequest"
                         }
                     }
                 ],
@@ -191,7 +196,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/userdto.UserPrivateDTO"
+                            "$ref": "#/definitions/userdto.PrivateDTO"
                         }
                     }
                 }
@@ -219,7 +224,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/userdto.UserPublicDTO"
+                            "$ref": "#/definitions/userdto.PrivateDTO"
                         }
                     }
                 }
@@ -253,7 +258,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "userdto.LoginRequest": {
+        "userdto.CreateRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -261,9 +266,11 @@ const docTemplate = `{
             ],
             "properties": {
                 "password": {
+                    "description": "密码",
                     "type": "string"
                 },
                 "username": {
+                    "description": "用户名",
                     "type": "string"
                 }
             }
@@ -272,69 +279,94 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "token": {
+                    "description": "token",
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/userdto.UserPrivateDTO"
+                    "description": "用户信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/userdto.PrivateDTO"
+                        }
+                    ]
                 }
             }
         },
-        "userdto.UserPrivateDTO": {
+        "userdto.PrivateDTO": {
             "type": "object",
             "properties": {
                 "avatar": {
+                    "description": "头像",
                     "type": "string"
                 },
                 "email": {
+                    "description": "邮箱",
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID",
                     "type": "integer"
                 },
                 "phone": {
+                    "description": "手机号",
                     "type": "string"
                 },
                 "username": {
+                    "description": "用户名",
                     "type": "string"
                 }
             }
         },
-        "userdto.UserPublicDTO": {
+        "userdto.PublicDTO": {
             "type": "object",
             "properties": {
                 "avatar": {
+                    "description": "头像",
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID",
                     "type": "integer"
                 },
                 "username": {
+                    "description": "用户名",
                     "type": "string"
                 }
             }
         },
-        "userdto.UserUpdateRequest": {
+        "userdto.UpdateRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
+                    "description": "头像",
                     "type": "string"
                 },
                 "username": {
+                    "description": "用户名",
                     "type": "string"
                 }
             }
         },
-        "v1.PageResponse": {
+        "userdto.UserPageResponse": {
             "type": "object",
             "properties": {
-                "data": {},
+                "data": {
+                    "description": "列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/userdto.PublicDTO"
+                    }
+                },
                 "page": {
+                    "description": "页码",
                     "type": "integer"
                 },
                 "pageSize": {
+                    "description": "条数",
                     "type": "integer"
                 },
                 "total": {
+                    "description": "总数",
                     "type": "integer"
                 }
             }

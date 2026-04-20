@@ -41,7 +41,8 @@ install:
 # ====================
 
 swag:
-	swag init -g cmd/server/main.go
+	swag init -g main.go -d cmd/server,internal,pkg,api
+# 	swag init -g cmd/server/main.go
 
 
 

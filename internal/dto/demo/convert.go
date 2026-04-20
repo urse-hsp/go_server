@@ -4,14 +4,16 @@ import "go-server/internal/model"
 
 // ================= DTO 转换 =================
 
-// 👉 他人可见
+// 他人可见
 func ToPublicDTO(u *model.Demo) PublicDTO {
 	return PublicDTO{}
 }
 
-// 👉 自己可见
+// 自己可见
 func ToPrivateDTO(u *model.Demo) PrivateDTO {
-	return PrivateDTO{}
+	return PrivateDTO{
+		PublicDTO: ToPublicDTO(u),
+	}
 }
 
 func ListToPublic(users []model.Demo) []PublicDTO {

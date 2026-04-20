@@ -27,7 +27,7 @@ type demoController struct {
 // @Accept json
 // @Produce json
 // @Param data body demodto.CreateRequest true "注册参数"
-// @Success 201 {object} demodto.UserPrivateDTO
+// @Success 201 {object} demodto.ToPrivateDTO
 // @Router /demo [post]
 
 func (u *demoController) Create(c *gin.Context) {
@@ -85,7 +85,7 @@ func (u *demoController) Delete(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param data body demodto.UpdateRequest true "更新参数"
-// @Success 200 {object} demodto.UserPrivateDTO
+// @Success 200 {object} demodto.ToPrivateDTO
 // @Router /demo [put]
 
 func (u *demoController) Update(c *gin.Context) {
@@ -115,7 +115,7 @@ func (u *demoController) Update(c *gin.Context) {
 // @Tags DEMO
 // @Produce json
 // @Param id path int true "ID"
-// @Success 200 {object} demodto.UserPublicDTO
+// @Success 200 {object} demodto.ToPublicDTO
 // @Router /demo/{id} [get]
 
 func (u *demoController) GetDetail(c *gin.Context) {
@@ -124,20 +124,13 @@ func (u *demoController) GetDetail(c *gin.Context) {
 		return
 	}
 
-	user, err := u.Service.GetDetail(c, uint(id))
+	data, err := u.Service.GetDetail(c, uint(id))
 	if err != nil {
 		v1.BadRequest(c, err.Error())
 		return
 	}
 
-	currentUserID := GetUserIdFromCtx(c)
-
-	// 权限控制：自己 vs 他人
-	if currentUserID == uint(id) {
-		v1.Success(c, demodto.ToPrivateDTO(user))
-	} else {
-		v1.Success(c, demodto.ToPublicDTO(user))
-	}
+	v1.Success(c, demodto.ToPublicDTO(data))
 }
 
 // ================= 列表 =================
@@ -146,7 +139,7 @@ func (u *demoController) GetDetail(c *gin.Context) {
 // @Tags DEMO
 // @Produce json
 // @Param data query demodto.RequestQuery false "查询参数"
-// @Success 200 {object} []demodto.UserPublicDTO
+// @Success 200 {object} []demodto.ListToPublic
 // @Router /user [get]
 
 func (u *demoController) GetList(c *gin.Context) {
@@ -174,7 +167,7 @@ func (u *demoController) GetList(c *gin.Context) {
 // @Tags DEMO
 // @Produce json
 // @Param data query demodto.RequestPageQuery false "查询参数"
-// @Success 200 {object} v1.PageResponse
+// @Success 200 {object} demodto.DemoPageResponse
 // @Router /demo/lists [get]
 
 func (u *demoController) GetPageList(c *gin.Context) {

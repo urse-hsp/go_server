@@ -83,11 +83,13 @@ func ServerError(c *gin.Context, msg ...string) {
 // =================  分页 =================
 
 // List 成功返回（分页）
-func List(c *gin.Context, data any, total int, page int, pageSize int) {
-	writeJSON(c, http.StatusOK, PageResponse{
-		Data:     data,
-		Total:    total,
-		Page:     page,
-		PageSize: pageSize,
+func List[T any](c *gin.Context, data []T, total int, page int, pageSize int) {
+	writeJSON(c, http.StatusOK, PageResponse[T]{
+		Data: data,
+		PageSizeResponse: PageSizeResponse{
+			Total:    total,
+			Page:     page,
+			PageSize: pageSize,
+		},
 	})
 }

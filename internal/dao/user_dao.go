@@ -127,8 +127,8 @@ func (r *userRepository) GetPageList(ctx context.Context, q userdto.RequestPageQ
 func (r *userRepository) buildQuery(ctx context.Context, q userdto.RequestQuery) *gorm.DB {
 	db := r.DB(ctx).Model(&model.User{})
 
-	if q.Query != nil && *q.Query != "" {
-		db = db.Where("username LIKE ?", "%"+*q.Query+"%")
+	if q.Query != "" {
+		db = db.Where("username LIKE ?", "%"+q.Query+"%")
 	}
 
 	return db

@@ -135,9 +135,16 @@ func (r *demoRepository) GetPageList(ctx context.Context, q demodto.RequestPageQ
 func (r *demoRepository) buildQuery(ctx context.Context, q demodto.RequestQuery) *gorm.DB {
 	db := r.DB(ctx).Model(&model.Demo{})
 
-	if q.Query != nil {
-		like := "%" + *q.Query + "%"
-		db = db.Where("username LIKE ?", like)
+	if q.Query != "" {
+		db = db.Where("username LIKE ?", "%"+q.Query+"%")
+	}
+
+	if q.Status != nil {
+		db = db.Where("status = ?", *q.Status)
+	}
+
+	if q.Type != nil {
+		db = db.Where("type = ?", *q.Type)
 	}
 
 	return db
