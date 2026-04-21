@@ -25,17 +25,22 @@ func NewMigrateServer(db *gorm.DB, log *log.Logger) *MigrateServer {
 
 // Start 入口
 func (m *MigrateServer) Start() error {
-	// 1. AutoMigrate（仅开发/初始化用）
+	// 执行 SQL migration
+	if err := m.RunSQLMigrations(); err != nil {
+		return err
+	}
+
+	// 手动结构变更
+	if err := m.migrateUser(); err != nil {
+		return err
+	}
+
+	// 同步结构
 	if err := m.db.AutoMigrate(model.GetModels()...); err != nil {
 		return err
 	}
 
-	m.log.Info("AutoMigrate success")
-
-	// 2. SQL migration
-	if err := m.RunSQLMigrations(); err != nil {
-		return err
-	}
+	m.log.Info("migrate success")
 
 	return nil
 }
@@ -77,7 +82,8 @@ func (m *MigrateServer) RunSQLMigrations() error {
 	}
 
 	// 3. 读取 migration 文件（推荐绝对路径方式）
-	dir := filepath.Join("cmd", "migration", "sql")
+	// dir := filepath.Join("cmd", "migration", "sql")
+	dir, _ := filepath.Abs("cmd/migration/sql")
 	if _, err := os.Stat(dir); err != nil {
 		m.log.Fatal("migration dir not found", zap.String("dir", dir), zap.Error(err))
 	}
@@ -156,5 +162,15 @@ func (m *MigrateServer) RunSQLMigrations() error {
 
 	m.log.Info("SQL migrations done")
 
+	return nil
+}
+
+// Migrator 手动结构变更
+func (m *MigrateServer) migrateUser() error {
+	// if m.db.Migrator().HasColumn(&model.User{}, "name") &&
+	// 	!m.db.Migrator().HasColumn(&model.User{}, "username") {
+
+	// 	return m.db.Migrator().RenameColumn(&model.User{}, "name", "username")
+	// }
 	return nil
 }

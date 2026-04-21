@@ -1,1 +1,1 @@
-ALTER TABLE users DROP COLUMN avatars;
+ALTER TABLE users CHANGE name username varchar(50)

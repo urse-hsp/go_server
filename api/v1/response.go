@@ -87,9 +87,11 @@ func List[T any](c *gin.Context, data []T, total int, page int, pageSize int) {
 	writeJSON(c, http.StatusOK, PageResponse[T]{
 		Data: data,
 		PageSizeResponse: PageSizeResponse{
-			Total:    total,
-			Page:     page,
-			PageSize: pageSize,
+			Total: total,
+			PageRequest: PageRequest{
+				Page:     page,
+				PageSize: pageSize,
+			},
 		},
 	})
 }

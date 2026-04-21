@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"go-server/internal/bootstrap"
 	"go-server/internal/controller"
 	"go-server/internal/router"
@@ -17,8 +18,9 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-	envConf := "config/local.yaml"
-	conf := config.NewConfig(envConf)
+	// envConf := "config/local.yaml"
+	var envConf = flag.String("conf", "config/local.yml", "config path, eg: -conf ./config/local.yml")
+	conf := config.NewConfig(*envConf)
 
 	// 初始化组件
 	logger := log.NewLog(conf)          // 初始化日志

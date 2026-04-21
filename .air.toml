@@ -1,0 +1,14 @@
+# .air.toml
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/app ./cmd/server"
+bin = "tmp/app"
+full_bin = "APP_CONF=config/local.yml ./tmp/app"
+include_ext = ["go", "yaml", "yml"]
+exclude_dir = ["tmp", "vendor", "node_modules"]
+delay = 1000
+
+[log]
+time = true

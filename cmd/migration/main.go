@@ -3,6 +3,7 @@
 package main
 
 import (
+	"flag"
 	"go-server/internal/bootstrap"
 	"go-server/pkg/config"
 	"go-server/pkg/log"
@@ -13,7 +14,9 @@ import (
 
 // 迁移数据库
 func main() {
-	conf := config.NewConfig("config/local.yaml")
+	var envConf = flag.String("conf", "config/local.yml", "config path, eg: -conf ./config/local.yml")
+	conf := config.NewConfig(*envConf)
+
 	logger := log.NewLog(conf)
 
 	db := bootstrap.NewDB(conf, logger)
@@ -26,4 +29,5 @@ func main() {
 
 	logger.Info("migration done")
 
+	println("✅ migration 执行完成")
 }

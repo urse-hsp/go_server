@@ -8,7 +8,7 @@ import (
 
 type User struct {
 	ID        uint           `gorm:"primaryKey;autoIncrement;`
-	Username  string         `gorm:"size:50;not null;unique;comment:用户名1"`
+	Username  string         `gorm:"size:50;not null;unique;comment:用户名"`
 	Password  string         `gorm:"size:255;not null;comment:密码"`
 	Avatar    string         `gorm:"size:255;not null;default:'https://cdn-icons-png.flaticon.com/512/149/149071.png';comment:头像"`
 	Age       int            `gorm:"not null; default: 0;comment:年龄"`

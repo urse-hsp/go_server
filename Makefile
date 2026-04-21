@@ -1,35 +1,103 @@
-.PHONY: server migration task build dev tidy swag install
+.PHONY: help dev server task migration \
+        build clean \
+        docker-build up down restart logs ps \
+        migrate deploy \
+        tidy install swag
 
 # ====================
-# 基础运行
+# 变量
 # ====================
+APP_NAME=demo
+DOCKER_COMPOSE_FILE=deploy/docker-compose/docker-compose.yml
 
+# ====================
+# 帮助
+# ====================
+help:
+	@echo "make dev        - 本地开发（server + migration）"
+	@echo "make server     - 本地运行 server"
+	@echo "make task       - 本地运行 task"
+	@echo "make migration  - 本地执行 migration"
+	@echo ""
+	@echo "make build      - 构建所有二进制"
+	@echo "make clean      - 清理构建产物"
+	@echo ""
+	@echo "make docker-build - 构建 Docker 镜像"
+	@echo "make up         - 启动 server + task"
+	@echo "make down       - 停止服务"
+	@echo "make logs       - 查看日志"
+	@echo ""
+	@echo "make migrate    - 执行数据库迁移"
+	@echo "make deploy     - 一键部署"
+
+# ====================
+# 本地开发
+# ====================
 server:
-	go run cmd/server/main.go
-
-migration:
-	go run cmd/migration/main.go
+	APP_CONF=config/local.yml go run cmd/server/main.go
 
 task:
-	go run cmd/task/main.go
+	APP_CONF=config/local.yml go run cmd/task/main.go
 
-# ====================
-# 构建
-# ====================
-
-build:
-	go build -o app cmd/server/main.go
-
-# ====================
-# 开发流程
-# ====================
+migration:
+	APP_CONF=config/local.yml go run cmd/migration/main.go
 
 dev: migration server
 
 # ====================
-# 依赖管理
+# 构建
+# ====================
+build:
+	@echo ">>> building binaries..."
+	go build -o bin/server cmd/server/main.go
+	go build -o bin/task cmd/task/main.go
+	go build -o bin/migration cmd/migration/main.go
+
+clean:
+	rm -rf bin/
+
+# ====================
+# Docker
 # ====================
 
+# 构建镜像
+docker-build:
+	docker compose -p $(APP_NAME) -f $(DOCKER_COMPOSE_FILE) build
+	
+# 启动服务
+up:
+	docker compose -p $(APP_NAME) -f $(DOCKER_COMPOSE_FILE) up -d server task
+
+# 停止服务
+down:
+	docker compose -p $(APP_NAME) -f $(DOCKER_COMPOSE_FILE) down
+
+# 重启服务
+restart:
+	docker compose -p $(APP_NAME) -f $(DOCKER_COMPOSE_FILE) restart
+
+logs:
+	docker compose -p $(APP_NAME) -f $(DOCKER_COMPOSE_FILE) logs -f
+
+ps:
+	docker compose -p $(APP_NAME) -f $(DOCKER_COMPOSE_FILE) ps
+
+# ====================
+# Migration（重点）
+# ====================
+migrate:
+	docker compose -p $(APP_NAME) -f $(DOCKER_COMPOSE_FILE) run --rm migration
+
+# ====================
+# 一键部署（推荐）
+# ====================
+deploy: docker-build migrate up
+	@echo ">>> deploy success 🚀"
+# 构建+启动 docker compose up -d --build 
+
+# ====================
+# 依赖管理
+# ====================
 tidy:
 	go mod tidy
 
@@ -37,19 +105,7 @@ install:
 	go mod download
 
 # ====================
-# 文档
+# Swagger
 # ====================
-
 swag:
-	swag init -g main.go -d cmd/server,internal,pkg,api
-# 	swag init -g cmd/server/main.go
-
-
-
-# make server      # 启动服务
-# make migration   # 执行迁移
-# make task        # 启动任务
-# make dev         # 一键开发（先迁移再启动）
-# make tidy        # 清理依赖
-# make swag        # 生成接口文档
-# make build       # 打包
+	swag init -g cmd/server/main.go -d cmd/server,internal,pkg,api

@@ -11,8 +11,8 @@ Thumbs.db
 # air 生成的临时目录，必须忽略
 tmp/ 
 bin/
-dist/
-build/
+# dist/
+# build/
 *.exe
 *.out
 *.test

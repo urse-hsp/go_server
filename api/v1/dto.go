@@ -7,14 +7,13 @@ type Response struct {
 }
 
 type PageRequest struct {
-	Page     int `form:"page" binding:"required,min=1"`
-	PageSize int `form:"pageSize" binding:"required,min=1,max=100"`
+	Page     int `form:"page" binding:"required,min=1"`             // 页码
+	PageSize int `form:"pageSize" binding:"required,min=1,max=100"` // 条数
 }
 
 type PageSizeResponse struct {
-	Total    int `json:"total"`    // 总数
-	Page     int `json:"page"`     // 页码
-	PageSize int `json:"pageSize"` // 条数
+	Total int `json:"total"` // 总数
+	PageRequest
 }
 
 type PageResponse[T any] struct {
