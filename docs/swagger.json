@@ -9,7 +9,7 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
-        "/user": {
+        "/api/user/http": {
             "get": {
                 "produces": [
                     "application/json"
@@ -17,28 +17,19 @@
                 "tags": [
                     "用户"
                 ],
-                "summary": "用户列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "query",
-                        "in": "query"
-                    }
-                ],
+                "summary": "http获取用户列表",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/userdto.PrivateDTO"
-                            }
+                            "items": {}
                         }
                     }
                 }
             }
         },
-        "/user/info": {
+        "/api/user/info": {
             "get": {
                 "produces": [
                     "application/json"
@@ -88,7 +79,7 @@
                 }
             }
         },
-        "/user/lists": {
+        "/api/user/lists": {
             "get": {
                 "produces": [
                     "application/json"
@@ -101,6 +92,7 @@
                     {
                         "minimum": 1,
                         "type": "integer",
+                        "description": "页码",
                         "name": "page",
                         "in": "query",
                         "required": true
@@ -109,6 +101,7 @@
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
+                        "description": "条数",
                         "name": "pageSize",
                         "in": "query",
                         "required": true
@@ -129,7 +122,7 @@
                 }
             }
         },
-        "/user/login": {
+        "/api/user/login": {
             "post": {
                 "description": "输入账号密码获取 token",
                 "consumes": [
@@ -163,7 +156,7 @@
                 }
             }
         },
-        "/user/register": {
+        "/api/user/register": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -196,7 +189,7 @@
                 }
             }
         },
-        "/user/{id}": {
+        "/api/user/{id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -245,6 +238,35 @@
                         "description": "No Content",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "用户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "query",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/userdto.PrivateDTO"
+                            }
                         }
                     }
                 }
@@ -343,6 +365,10 @@
         },
         "userdto.UserPageResponse": {
             "type": "object",
+            "required": [
+                "page",
+                "pageSize"
+            ],
             "properties": {
                 "data": {
                     "description": "列表",
@@ -353,11 +379,14 @@
                 },
                 "page": {
                     "description": "页码",
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "pageSize": {
                     "description": "条数",
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
                 },
                 "total": {
                     "description": "总数",

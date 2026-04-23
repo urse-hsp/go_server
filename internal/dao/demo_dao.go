@@ -3,7 +3,6 @@ package dao
 import (
 	"context"
 	"fmt"
-	"go-server/internal/bootstrap"
 	demodto "go-server/internal/dto/demo"
 	"go-server/internal/model"
 
@@ -23,7 +22,7 @@ type DemoRepository interface {
 }
 
 func NewDemoRepository(
-	r *bootstrap.Repository,
+	r *Repository,
 ) DemoRepository {
 	return &demoRepository{
 		Repository: r,
@@ -31,7 +30,7 @@ func NewDemoRepository(
 }
 
 type demoRepository struct {
-	*bootstrap.Repository
+	*Repository
 }
 
 // ================= 根据ID查询 =================

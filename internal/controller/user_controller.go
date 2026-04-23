@@ -30,7 +30,7 @@ type userController struct {
 // @Produce json
 // @Param data body userdto.CreateRequest true "登录参数"
 // @Success 200 {object} userdto.LoginResponse
-// @Router /user/login [post]
+// @Router /api/user/login [post]
 func (u *userController) Login(c *gin.Context) {
 	var req userdto.CreateRequest
 
@@ -59,7 +59,7 @@ func (u *userController) Login(c *gin.Context) {
 // @Produce json
 // @Param data body userdto.CreateRequest true "注册参数"
 // @Success 201 {object}  userdto.PrivateDTO
-// @Router /user/register [post]
+// @Router /api/user/register [post]
 func (u *userController) Create(c *gin.Context) {
 	var req userdto.CreateRequest
 
@@ -84,7 +84,7 @@ func (u *userController) Create(c *gin.Context) {
 // @Produce json
 // @Param id path int true "用户ID"
 // @Success 204 {string} string "No Content"
-// @Router /user/{id} [delete]
+// @Router /api/user/{id} [delete]
 func (u *userController) Delete(c *gin.Context) {
 	id, ok := GetUintID(c, "id")
 	if !ok {
@@ -115,7 +115,7 @@ func (u *userController) Delete(c *gin.Context) {
 // @Produce json
 // @Param data body userdto.UpdateRequest true "更新参数"
 // @Success 200 {object} userdto.PrivateDTO
-// @Router /user/info [put]
+// @Router /api/user/info [put]
 func (u *userController) Update(c *gin.Context) {
 	userID := GetUserIdFromCtx(c)
 
@@ -140,7 +140,7 @@ func (u *userController) Update(c *gin.Context) {
 // @Tags 用户
 // @Produce json
 // @Success 200 {object} userdto.PrivateDTO
-// @Router /user/info [get]
+// @Router /api/user/info [get]
 func (u *userController) Get(c *gin.Context) {
 	// userID := v1.GetUserID(c)
 	userID := GetUserIdFromCtx(c)
@@ -162,7 +162,7 @@ func (u *userController) Get(c *gin.Context) {
 // @Produce json
 // @Param id path int true "用户ID"
 // @Success 200 {object} userdto.PrivateDTO
-// @Router /user/{id} [get]
+// @Router /api/user/{id} [get]
 func (u *userController) GetDetail(c *gin.Context) {
 	id, ok := GetUintID(c, "id")
 	if !ok {
@@ -192,7 +192,7 @@ func (u *userController) GetDetail(c *gin.Context) {
 // @Produce json
 // @Param data query userdto.RequestQuery false "查询参数"
 // @Success 200 {object} []userdto.PrivateDTO
-// @Router /user [get]
+// @Router /api/user [get]
 func (u *userController) GetList(c *gin.Context) {
 	var q userdto.RequestQuery
 
@@ -219,7 +219,7 @@ func (u *userController) GetList(c *gin.Context) {
 // @Produce json
 // @Param data query userdto.RequestPageQuery false "查询参数"
 // @Success 200 {object} userdto.UserPageResponse
-// @Router /user/lists [get]
+// @Router /api/user/lists [get]
 func (u *userController) GetPageList(c *gin.Context) {
 	var q userdto.RequestPageQuery
 
@@ -238,4 +238,20 @@ func (u *userController) GetPageList(c *gin.Context) {
 	list := userdto.ListToPublic(users)
 
 	v1.List(c, list, int(total), q.Page, q.PageSize)
+}
+
+// ================= http接口 =================
+// @Summary http获取用户列表
+// @Tags 用户
+// @Produce json
+// @Success 200 {object} []any
+// @Router /api/user/http [get]
+func (u *userController) HttpUserList(c *gin.Context) {
+	users, err := u.Service.HttpUserList(c)
+	if err != nil {
+		v1.BadRequest(c, err.Error())
+		return
+	}
+
+	v1.Success(c, users)
 }

@@ -13,6 +13,20 @@ DOCKER_COMPOSE_FILE=deploy/docker-compose/docker-compose.yml
 # ====================
 # 帮助
 # ====================
+bootstrap:
+	cd deploy/docker-compose && docker compose -f bootstrap-compose.yml up -d
+	@echo "⏳ waiting for mysql..."
+	@sleep 5
+	go run ./cmd/migration
+	go run ./cmd/server
+# 	docker compose -f bootstrap-compose.yml up -d
+# 	go run ./cmd/migration
+# 	go run ./cmd/server
+
+
+# ====================
+# 帮助
+# ====================
 help:
 	@echo "make dev        - 本地开发（server + migration）"
 	@echo "make server     - 本地运行 server"
@@ -108,4 +122,5 @@ install:
 # Swagger
 # ====================
 swag:
-	swag init -g cmd/server/main.go -d cmd/server,internal,pkg,api
+		swag init -g cmd/server/main.go
+# 	swag init -g cmd/server/main.go -d cmd/server,internal,pkg,api

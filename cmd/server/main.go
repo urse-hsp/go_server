@@ -4,6 +4,7 @@ import (
 	"flag"
 	"go-server/internal/bootstrap"
 	"go-server/internal/controller"
+	"go-server/internal/dao"
 	"go-server/internal/router"
 	"go-server/internal/service"
 	"go-server/pkg/config"
@@ -23,12 +24,13 @@ func main() {
 	conf := config.NewConfig(*envConf)
 
 	// 初始化组件
-	logger := log.NewLog(conf)          // 初始化日志
-	DB := bootstrap.NewDB(conf, logger) // 初始化 MySQL
-	RDB := bootstrap.NewRedis(conf)     // 初始化 Redis
+	logger := log.NewLog(conf)             // 初始化日志
+	DB := bootstrap.NewDB(conf, logger)    // 初始化 MySQL
+	RDB := bootstrap.NewRedis(conf)        // 初始化 Redis
+	RDBCache := bootstrap.NewRDBCache(RDB) // 初始化 Redis
 
-	repositoryRepository := bootstrap.NewRepository(logger, DB, RDB) // 初始化 Repository/dao，注入 Logger,DB,RDB
-	transaction := bootstrap.NewTransaction(repositoryRepository)    // 初始化 Transaction，注入 Repository/dao
+	repositoryRepository := dao.NewRepository(logger, DB)   // 初始化 Repository/dao，注入 Logger,DB,RDB
+	transaction := dao.NewTransaction(repositoryRepository) // 初始化 Transaction，注入 Repository/dao
 
 	sidSid := sid.NewSid()
 	jwtJWT := jwt.NewJwt(conf)
@@ -36,8 +38,8 @@ func main() {
 		panic("jwt init failed")
 	}
 
-	serviceService := service.NewService(transaction, logger, sidSid, jwtJWT) // 初始化 Service，注入 Transaction、Logger、Sid 和 JWT
-	Handler := controller.NewHandler(logger)                                  // 初始化 Handler
+	serviceService := service.NewService(transaction, logger, sidSid, jwtJWT, RDBCache) // 初始化 Service，注入 Transaction、Logger、Sid 和 JWT
+	Handler := controller.NewHandler(logger)                                            // 初始化 Handler
 
 	routerDeps := router.RouterDeps{
 		Logger:     logger,

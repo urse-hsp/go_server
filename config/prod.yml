@@ -13,7 +13,7 @@ data:
   db:
     user:
       driver: mysql
-      dsn: root:123456@tcp(host.docker.internal:3306)/farms2?charset=utf8mb4&parseTime=True&loc=Local
+      dsn: root:123456@tcp(host.docker.internal:3306)/go_demo?charset=utf8mb4&parseTime=True&loc=Local
   redis:
     addr: host.docker.internal:6379
     password: ""

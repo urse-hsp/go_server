@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/user": {
+        "/api/user/http": {
             "get": {
                 "produces": [
                     "application/json"
@@ -23,28 +23,19 @@ const docTemplate = `{
                 "tags": [
                     "用户"
                 ],
-                "summary": "用户列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "query",
-                        "in": "query"
-                    }
-                ],
+                "summary": "http获取用户列表",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/userdto.PrivateDTO"
-                            }
+                            "items": {}
                         }
                     }
                 }
             }
         },
-        "/user/info": {
+        "/api/user/info": {
             "get": {
                 "produces": [
                     "application/json"
@@ -94,7 +85,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/lists": {
+        "/api/user/lists": {
             "get": {
                 "produces": [
                     "application/json"
@@ -107,6 +98,7 @@ const docTemplate = `{
                     {
                         "minimum": 1,
                         "type": "integer",
+                        "description": "页码",
                         "name": "page",
                         "in": "query",
                         "required": true
@@ -115,6 +107,7 @@ const docTemplate = `{
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
+                        "description": "条数",
                         "name": "pageSize",
                         "in": "query",
                         "required": true
@@ -135,7 +128,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/login": {
+        "/api/user/login": {
             "post": {
                 "description": "输入账号密码获取 token",
                 "consumes": [
@@ -169,7 +162,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/register": {
+        "/api/user/register": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -202,7 +195,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/{id}": {
+        "/api/user/{id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -251,6 +244,35 @@ const docTemplate = `{
                         "description": "No Content",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "用户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "query",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/userdto.PrivateDTO"
+                            }
                         }
                     }
                 }
@@ -349,6 +371,10 @@ const docTemplate = `{
         },
         "userdto.UserPageResponse": {
             "type": "object",
+            "required": [
+                "page",
+                "pageSize"
+            ],
             "properties": {
                 "data": {
                     "description": "列表",
@@ -359,11 +385,14 @@ const docTemplate = `{
                 },
                 "page": {
                     "description": "页码",
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "pageSize": {
                     "description": "条数",
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
                 },
                 "total": {
                     "description": "总数",

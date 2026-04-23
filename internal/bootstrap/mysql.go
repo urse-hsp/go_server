@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"context"
 	"go-server/pkg/log"
 	"go-server/pkg/zapgorm2"
 	"time"
@@ -10,36 +9,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
-
-// 事物接口。将数据库事务的执行逻辑抽象化
-type Transaction interface {
-	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
-}
-
-func NewTransaction(r *Repository) Transaction {
-	return r
-}
-
-const ctxTxKey = "TxKey"
-
-// DB return tx
-// If you need to create a Transaction, you must call DB(ctx) and Transaction(ctx,fn)
-func (r *Repository) DB(ctx context.Context) *gorm.DB {
-	v := ctx.Value(ctxTxKey)
-	if v != nil {
-		if tx, ok := v.(*gorm.DB); ok {
-			return tx
-		}
-	}
-	return r.db.WithContext(ctx)
-}
-
-func (r *Repository) Transaction(ctx context.Context, fn func(ctx context.Context) error) error {
-	return r.DB(ctx).Transaction(func(tx *gorm.DB) error {
-		ctx = context.WithValue(ctx, ctxTxKey, tx)
-		return fn(ctx)
-	})
-}
 
 func NewDB(conf *viper.Viper, l *log.Logger) *gorm.DB {
 	var (

@@ -15,14 +15,14 @@ type Job interface {
 
 // 基础任务
 type BaseJob struct {
-	name     string
-	handler  func(ctx context.Context) error
-	retry    int
-	interval time.Duration
-	timeout  time.Duration
+	name     string                          // 任务名称
+	handler  func(ctx context.Context) error // 任务逻辑
+	retry    int                             // 重试次数
+	interval time.Duration                   // 重试间隔
+	timeout  time.Duration                   // 超时
 
-	mu      sync.Mutex
-	running bool
+	mu      sync.Mutex // 互斥
+	running bool       // 是否正在运行
 }
 
 // 创建任务信息

@@ -13,7 +13,7 @@ data:
   db:
     user:
       driver: mysql
-      dsn: root:123456@tcp(127.0.0.1:3306)/farms2?charset=utf8mb4&parseTime=True&loc=Local
+      dsn: root:123456@tcp(127.0.0.1:3306)/go_demo?charset=utf8mb4&parseTime=True&loc=Local
   redis:
     addr: 127.0.0.1:6379
     password: ""
